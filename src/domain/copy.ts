@@ -51,6 +51,19 @@ export const COPY = {
     "photos, with reasons and its own confidence. Suggestions are never " +
     "final: you accept or change every value. This site itself was built " +
     "with an AI coding agent under human direction.",
+  assessNewTitle: "Start a new assessment",
+  assessStep1of4: "Step 1 of 4: place and time",
+  siteNameLabel: "Place name (optional)",
+  latLabel: "Latitude",
+  lngLabel: "Longitude",
+  useLocation: "Use my location",
+  locating: "Getting your location…",
+  locationDenied: "Could not get your location. Enter it by hand.",
+  observedAtLabel: "Date and time of visit",
+  rainLabel: "Rain in the last 24 hours",
+  notesLabel: "Notes (optional)",
+  continueButton: "Continue",
+  submitError: "Something went wrong. Check your answers and try again.",
 } as const;
 
 export type CopyKey = keyof typeof COPY;
