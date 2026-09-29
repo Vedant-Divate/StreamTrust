@@ -1,5 +1,9 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+# local project spec and agent rules (kept out of the public repo)
+PROJECT.md
+AGENTS.md
+
 # dependencies
 /node_modules
 /.pnp
@@ -46,3 +50,5 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+
