@@ -64,6 +64,27 @@ export const COPY = {
   notesLabel: "Notes (optional)",
   continueButton: "Continue",
   submitError: "Something went wrong. Check your answers and try again.",
+  assessPhotosTitle: "Add photos",
+  assessStep2of4: "Step 2 of 4: photos",
+  photoHelp:
+    "Photos help reviewers trust your record. Each photo is resized on " +
+    "your device before upload.",
+  choosePhoto: "Choose a photo",
+  preparingPhoto: "Preparing photo…",
+  uploadingPhoto: "Uploading…",
+  uploadError: "Could not upload that photo. Try another one.",
+  removePhoto: "Remove photo",
+  noPhotos: "No photos yet.",
+  assessIndicatorsTitle: "Describe the water",
+  assessStep3of4: "Step 3 of 4: questions",
+  savingDraft: "Saving…",
+  savedDraft: "All changes saved.",
+  saveError: "Could not save. Check your connection and try again.",
+  notApplicableNote: "Not applicable — the stream bed is dry.",
+  dryNote: "No water here: the water questions are set to not applicable.",
+  backButton: "Back",
+  reviewButton: "Review and submit",
+  loadError: "Could not load this assessment. It may belong to another browser.",
 } as const;
 
 export type CopyKey = keyof typeof COPY;
