@@ -33,6 +33,12 @@ Phase 0 toolchain (exact installed versions from `pnpm list --depth=0`):
   shadcn CLI defaults to Base UI primitives instead of Radix; this is accepted
   as-is since both provide accessible primitives per PROJECT.md Section 5.
 
+## Phase 1 additions
+
+- drizzle-orm 0.45.3, @libsql/client 0.18.0, zod 4.6.5, drizzle-kit 0.31.11
+  (devDependency; needs esbuild postinstall builds, allowed in
+  `pnpm-workspace.yaml`).
+
 ## Consequences
 
 - Where the scaffold's file names differ from PROJECT.md Section 12
