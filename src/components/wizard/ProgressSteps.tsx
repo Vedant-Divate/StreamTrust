@@ -18,8 +18,8 @@ export function WizardNav({
 }: {
   backHref?: string;
   backLabel?: string;
-  nextHref: string;
-  nextLabel: string;
+  nextHref?: string;
+  nextLabel?: string;
 }) {
   return (
     <nav aria-label="Wizard" className="flex items-center justify-between gap-3 pt-2">
@@ -33,12 +33,16 @@ export function WizardNav({
           </a>
         )}
       </span>
-      <a
-        href={nextHref}
-        className="inline-flex min-h-[44px] items-center rounded-lg bg-primary px-6 text-base font-medium text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-      >
-        {nextLabel}
-      </a>
+      <span>
+        {nextHref && nextLabel && (
+          <a
+            href={nextHref}
+            className="inline-flex min-h-[44px] items-center rounded-lg bg-primary px-6 text-base font-medium text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          >
+            {nextLabel}
+          </a>
+        )}
+      </span>
     </nav>
   );
 }

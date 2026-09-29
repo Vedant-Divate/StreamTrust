@@ -17,6 +17,7 @@ const dbFile = join(tmpdir(), `st-api-test-${process.pid}-${Date.now()}.db`).rep
 let POST: (req: Request) => Promise<Response>;
 let GET_ONE: (req: Request, ctx: { params: Promise<{ id: string }> }) => Promise<Response>;
 let PATCH_ONE: (req: Request, ctx: { params: Promise<{ id: string }> }) => Promise<Response>;
+let POST_SUBMIT: (req: Request, ctx: { params: Promise<{ id: string }> }) => Promise<Response>;
 let GET_HEALTH: () => Promise<Response>;
 let setupDb: ReturnType<typeof drizzle>;
 let setupClient: Client;
@@ -67,6 +68,7 @@ beforeAll(async () => {
   const one = await import("@/app/api/assessments/[id]/route");
   GET_ONE = one.GET;
   PATCH_ONE = one.PATCH;
+  ({ POST: POST_SUBMIT } = await import("@/app/api/assessments/[id]/submit/route"));
   ({ GET: GET_HEALTH } = await import("@/app/api/health/route"));
 });
 
@@ -206,6 +208,65 @@ describe("PATCH /api/assessments/:id", () => {
       ctxFor(id)
     );
     expect(res.status).toBe(409);
+  });
+});
+
+describe("POST /api/assessments/:id/submit", () => {
+  const allSix = [
+    { indicator: "clarity", final_value: "clear" },
+    { indicator: "color", final_value: "colorless" },
+    { indicator: "algae", final_value: "none" },
+    { indicator: "litter", final_value: "none" },
+    { indicator: "flow", final_value: "slow" },
+    { indicator: "odor", final_value: "none" },
+  ];
+
+  it("rejects an incomplete draft (400)", async () => {
+    const { json, cookie } = await createDraft();
+    const res = await POST_SUBMIT(
+      new Request(`http://localhost/api/assessments/${json.assessment.id}/submit`, {
+        method: "POST",
+        headers: { cookie: `st_vid=${cookie}` },
+      }),
+      ctxFor(json.assessment.id)
+    );
+    expect(res.status).toBe(400);
+    const body = (await res.json()) as { error: { code: string; details?: unknown } };
+    expect(body.error.code).toBe("incomplete");
+  });
+
+  it("submits a fully answered draft", async () => {
+    const { json, cookie } = await createDraft();
+    const id = json.assessment.id;
+    const patched = await PATCH_ONE(
+      new Request(`http://localhost/api/assessments/${id}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json", cookie: `st_vid=${cookie}` },
+        body: JSON.stringify({ entries: allSix }),
+      }),
+      ctxFor(id)
+    );
+    expect(patched.status).toBe(200);
+
+    const res = await POST_SUBMIT(
+      new Request(`http://localhost/api/assessments/${id}/submit`, {
+        method: "POST",
+        headers: { cookie: `st_vid=${cookie}` },
+      }),
+      ctxFor(id)
+    );
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { assessment: { status: string } };
+    expect(body.assessment.status).toBe("submitted");
+
+    const again = await POST_SUBMIT(
+      new Request(`http://localhost/api/assessments/${id}/submit`, {
+        method: "POST",
+        headers: { cookie: `st_vid=${cookie}` },
+      }),
+      ctxFor(id)
+    );
+    expect(again.status).toBe(409);
   });
 });
 

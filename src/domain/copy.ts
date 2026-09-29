@@ -85,6 +85,17 @@ export const COPY = {
   backButton: "Back",
   reviewButton: "Review and submit",
   loadError: "Could not load this assessment. It may belong to another browser.",
+  assessReviewTitle: "Review your answers",
+  assessStep4of4: "Step 4 of 4: review",
+  missingAnswers: "Answer every question before submitting.",
+  submitButton: "Submit assessment",
+  submitting: "Submitting…",
+  doneTitle: "Assessment saved. Thank you!",
+  doneText:
+    "Your answers are saved. Below is the raw data for this assessment; " +
+    "a standards-format view arrives in a later step.",
+  viewData: "Your data",
+  downloadJson: "Download JSON",
 } as const;
 
 export type CopyKey = keyof typeof COPY;

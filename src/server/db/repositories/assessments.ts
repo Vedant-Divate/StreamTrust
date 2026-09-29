@@ -161,3 +161,19 @@ export async function getAssessmentView(db: DbClient, assessmentId: string) {
     .where(eq(photos.assessmentId, assessmentId));
   return { assessment, site, entries, suggestions, photos: photoMeta };
 }
+
+/**
+ * Finalize a draft. Only flips a `draft` row to `submitted` (returns
+ * false otherwise); completeness and rule gating live in the routes
+ * and Phase 5, not here.
+ */
+export async function submitAssessment(db: DbClient, assessmentId: string) {
+  const assessment = await getAssessmentById(db, assessmentId);
+  if (!assessment || assessment.status !== "draft") return undefined;
+  const submittedAt = new Date().toISOString();
+  await db
+    .update(assessments)
+    .set({ status: "submitted", submittedAt })
+    .where(eq(assessments.id, assessmentId));
+  return getAssessmentById(db, assessmentId);
+}
