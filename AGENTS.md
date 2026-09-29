@@ -15,7 +15,7 @@ Rules:
    apply the documented default, log the ambiguity in `docs/questions.md`,
    and continue — don't stall waiting for an answer.
 5. Any deviation from PROJECT.md requires an ADR in `docs/decisions/` (template
-   in PROJECT.md Appendix F) committed in the same or a preceding commit.
+   in PROJECT.md Appendix C) committed in the same or a preceding commit.
 6. Never commit secrets. `.env.example` only, with placeholders.
 7. Domain code (`src/domain/**`) must not import from `src/server/**` or
    `src/app/**`. UI code must not import from `src/server/**`.

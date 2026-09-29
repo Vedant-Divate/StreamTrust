@@ -32,7 +32,7 @@
 3. `README.md`.
 4. Code comments.
 
-Any deviation from this document must be recorded as an ADR (template in Appendix F) **before** the deviating code is committed.
+Any deviation from this document must be recorded as an ADR (template in Appendix C) **before** the deviating code is committed.
 
 ---
 
@@ -1191,7 +1191,7 @@ Rules:
    apply the documented default, log the ambiguity in `docs/questions.md`,
    and continue — don't stall waiting for an answer.
 5. Any deviation from PROJECT.md requires an ADR in `docs/decisions/` (template
-   in PROJECT.md Appendix F) committed in the same or a preceding commit.
+   in PROJECT.md Appendix C) committed in the same or a preceding commit.
 6. Never commit secrets. `.env.example` only, with placeholders.
 7. Domain code (`src/domain/**`) must not import from `src/server/**` or
    `src/app/**`. UI code must not import from `src/server/**`.
@@ -1222,7 +1222,7 @@ Requirements:
   ambiguity and what you chose, and continue.
 - If you need to deviate from PROJECT.md (different library, different
   field, different resource shape, etc.), write an ADR in docs/decisions/
-  using the template in Appendix F before committing the deviating code.
+  using the template in Appendix C before committing the deviating code.
 
 Stop and summarize once the phase's Exit criteria (Section 14) are met and
 the verification file is written. Do not start the next phase.
