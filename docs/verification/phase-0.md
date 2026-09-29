@@ -71,6 +71,13 @@ StatusCode: 200
 Default Next landing (retitled "StreamTrust") renders; server stopped and
 port 3000 confirmed free afterwards.
 
+## Live URL
+
+https://streamtrust.vercel.app/ — empty shell deployed on Vercel (Hobby),
+confirmed serving the StreamTrust-titled landing with HTTP 200 on 2026-09-29.
+D-01 resolved: local `main` pushed to `github.com/Vedant-Divate/StreamTrust`
+and imported with Framework preset Next.js, all build settings default.
+
 ## Section 4 resolutions
 
 - A-1 vocabulary: UNRESOLVED, using Section 7.1 (no official protocol found).
@@ -95,10 +102,8 @@ port 3000 confirmed free afterwards.
   default; recorded in ADR-0002).
 - shadcn CLI defaulted to Base UI primitives instead of Radix (recorded in
   ADR-0002; both are accessible primitives).
-- `ci(deploy): connect empty app to Vercel` NOT done — no Vercel credentials
-  in this environment. Human step: `vercel` in repo root (or import the repo
-  at vercel.com/new), set no env vars needed for the empty shell, confirm
-  the public URL here. Tracked as D-01 in docs/questions.md.
+- Empty shell live at https://streamtrust.vercel.app/ (Vercel Hobby, Next.js
+  preset, default build settings, no env vars). D-01 resolved.
 
 ## Commits in this phase
 

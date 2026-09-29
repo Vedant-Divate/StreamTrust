@@ -11,4 +11,4 @@ Phase 0 resolutions were checked against the live Devpost pages on 2026-09-29.
 - A-6 (AI-assisted coding disclosure): UNRESOLVED by organizers — disclosing in README per Phase 0 default ("Built with an AI coding agent under human direction"); final README wording lands in Phase 9.
 - A-7 (prize eligibility for India): UNRESOLVED — "All Cash Prizes Subject to IEEE rules and regulation"; human to email oneaquahealth@ieee.org if prize money matters. Does not block building.
 - A-8 (real observation data availability): UNRESOLVED — no public export found; using own photos + clearly labelled synthetic demo data (Phase 0 default).
-- D-01 (Vercel deploy needs human credentials): OPEN — empty shell builds locally; production deploy requires the human to connect the repo to Vercel (Phase 0 exit criteria partially pending, see docs/verification/phase-0.md).
+- D-01 (Vercel deploy): RESOLVED — live at https://streamtrust.vercel.app/ (Phase 0 exit criteria fully met).
