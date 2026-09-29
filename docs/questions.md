@@ -12,3 +12,4 @@ Phase 0 resolutions were checked against the live Devpost pages on 2026-09-29.
 - A-7 (prize eligibility for India): UNRESOLVED — "All Cash Prizes Subject to IEEE rules and regulation"; human to email oneaquahealth@ieee.org if prize money matters. Does not block building.
 - A-8 (real observation data availability): UNRESOLVED — no public export found; using own photos + clearly labelled synthetic demo data (Phase 0 default).
 - D-01 (Vercel deploy): RESOLVED — live at https://streamtrust.vercel.app/ (Phase 0 exit criteria fully met).
+- D-02 (repo tests use `:memory:` libSQL, not temp files): the Windows file lock survives `client.close()`, so temp-file cleanup failed with EPERM; same driver + same real migration, so no behavior difference (Phase 1).
