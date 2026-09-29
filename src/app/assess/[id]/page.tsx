@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { COPY } from "@/domain/copy";
 import {
@@ -29,6 +29,10 @@ export default function Wizard() {
   const [view, setView] = useState<View | null>(null);
   const [loadError, setLoadError] = useState("");
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  // Autosaves can overlap when the user answers quickly. Only the latest
+  // response may update the view; stale ones are dropped so the UI (and
+  // the "saved" flag) never reflects an older server state.
+  const saveSeq = useRef(0);
 
   const refresh = useCallback(async () => {
     const res = await fetch(`/api/assessments/${id}`);
@@ -64,6 +68,7 @@ export default function Wizard() {
   }, [id]);
 
   async function saveEntries(entries: { indicator: string; final_value: string }[]) {
+    const seq = ++saveSeq.current;
     setSaveState("saving");
     try {
       const res = await fetch(`/api/assessments/${id}`, {
@@ -73,10 +78,12 @@ export default function Wizard() {
       });
       if (!res.ok) throw new Error("save failed");
       const updated = (await res.json()) as View;
-      setView(updated);
-      setSaveState("saved");
+      if (seq === saveSeq.current) {
+        setView(updated);
+        setSaveState("saved");
+      }
     } catch {
-      setSaveState("error");
+      if (seq === saveSeq.current) setSaveState("error");
     }
   }
 

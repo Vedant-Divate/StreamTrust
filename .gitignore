@@ -16,6 +16,8 @@ AGENTS.md
 
 # testing
 /coverage
+/test-results/
+/playwright-report/
 
 # local databases (dev/test artifacts, never commit)
 *.db
