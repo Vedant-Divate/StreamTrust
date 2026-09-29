@@ -6,7 +6,14 @@
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import type { DbClient } from "@/server/db/client";
-import { assessments, indicatorEntries, sites, volunteers } from "@/server/db/schema";
+import {
+  aiSuggestions,
+  assessments,
+  indicatorEntries,
+  photos,
+  sites,
+  volunteers,
+} from "@/server/db/schema";
 
 function now(): string {
   return new Date().toISOString();
@@ -126,4 +133,31 @@ export async function upsertIndicatorEntry(db: DbClient, input: UpsertEntryInput
 
 export async function getIndicatorEntries(db: DbClient, assessmentId: string) {
   return db.select().from(indicatorEntries).where(eq(indicatorEntries.assessmentId, assessmentId));
+}
+
+/**
+ * Read-only composed view for the API: assessment + site + entries +
+ * suggestions + photo metadata (never photo bytes).
+ */
+export async function getAssessmentView(db: DbClient, assessmentId: string) {
+  const assessment = await getAssessmentById(db, assessmentId);
+  if (!assessment) return undefined;
+  const [site] = await db.select().from(sites).where(eq(sites.id, assessment.siteId));
+  const entries = await getIndicatorEntries(db, assessmentId);
+  const suggestions = await db
+    .select()
+    .from(aiSuggestions)
+    .where(eq(aiSuggestions.assessmentId, assessmentId));
+  const photoMeta = await db
+    .select({
+      id: photos.id,
+      mime: photos.mime,
+      width: photos.width,
+      height: photos.height,
+      sha256: photos.sha256,
+      createdAt: photos.createdAt,
+    })
+    .from(photos)
+    .where(eq(photos.assessmentId, assessmentId));
+  return { assessment, site, entries, suggestions, photos: photoMeta };
 }
