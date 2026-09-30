@@ -14,4 +14,4 @@ Phase 0 resolutions were checked against the live Devpost pages on 2026-09-29.
 - D-01 (Vercel deploy): RESOLVED — live at https://streamtrust.vercel.app/ (Phase 0 exit criteria fully met).
 - D-02 (repo tests use `:memory:` libSQL, not temp files): the Windows file lock survives `client.close()`, so temp-file cleanup failed with EPERM; same driver + same real migration, so no behavior difference (Phase 1).
 - D-03 (photo waiver persistence): RESOLVED by ADR-0010 — `photo_waived` column added and persisted at submit; payload waiver remains the submit-moment attestation for rule evaluation.
-- D-04 (insights scope): submitted assessments only — draft `decision_source` values are placeholders and drafts are mutable, so only finalized records feed the agreement dashboard (Phase 7).
+- D-04 (insights scope): submitted assessments only — draft `decision_source` values are placeholders and drafts are mutable, so only finalized records feed the agreement dashboard (Phase 7). No explicit PROJECT.md Section 7 or 9 rule requires this; it is the implementer's own reasonable default, honest because Section 7.3 locks assessment state only at submit time.
