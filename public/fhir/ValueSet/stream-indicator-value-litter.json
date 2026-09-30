@@ -1,0 +1,28 @@
+{
+  "resourceType": "ValueSet",
+  "url": "http://localhost:3000/fhir/ValueSet/stream-indicator-value-litter",
+  "name": "StreamIndicatorValueLitter",
+  "title": "StreamTrust values for Litter or debris visible?",
+  "status": "active",
+  "compose": {
+    "include": [
+      {
+        "system": "http://localhost:3000/fhir/CodeSystem/stream-indicator-value",
+        "concept": [
+          {
+            "code": "litter-none",
+            "display": "None"
+          },
+          {
+            "code": "litter-some",
+            "display": "A little"
+          },
+          {
+            "code": "litter-a_lot",
+            "display": "A lot"
+          }
+        ]
+      }
+    ]
+  }
+}

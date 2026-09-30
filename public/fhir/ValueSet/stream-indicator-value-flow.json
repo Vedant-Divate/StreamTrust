@@ -1,0 +1,36 @@
+{
+  "resourceType": "ValueSet",
+  "url": "http://localhost:3000/fhir/ValueSet/stream-indicator-value-flow",
+  "name": "StreamIndicatorValueFlow",
+  "title": "StreamTrust values for How is the water moving?",
+  "status": "active",
+  "compose": {
+    "include": [
+      {
+        "system": "http://localhost:3000/fhir/CodeSystem/stream-indicator-value",
+        "concept": [
+          {
+            "code": "flow-dry",
+            "display": "No water"
+          },
+          {
+            "code": "flow-standing",
+            "display": "Still"
+          },
+          {
+            "code": "flow-slow",
+            "display": "Slow"
+          },
+          {
+            "code": "flow-moderate",
+            "display": "Moderate"
+          },
+          {
+            "code": "flow-fast",
+            "display": "Fast"
+          }
+        ]
+      }
+    ]
+  }
+}

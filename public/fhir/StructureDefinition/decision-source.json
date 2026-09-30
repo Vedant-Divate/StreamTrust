@@ -1,0 +1,33 @@
+{
+  "resourceType": "StructureDefinition",
+  "url": "http://localhost:3000/fhir/StructureDefinition/decision-source",
+  "name": "decision-source",
+  "title": "StreamTrust decision-source",
+  "status": "active",
+  "kind": "complex-type",
+  "abstract": false,
+  "type": "Extension",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Extension",
+  "derivation": "constraint",
+  "context": [
+    {
+      "type": "element",
+      "expression": "Provenance"
+    }
+  ],
+  "differential": {
+    "element": [
+      {
+        "id": "Extension",
+        "path": "Extension",
+        "min": 0,
+        "max": "1"
+      },
+      {
+        "id": "Extension.url",
+        "path": "Extension.url",
+        "fixedUri": "http://localhost:3000/fhir/StructureDefinition/decision-source"
+      }
+    ]
+  }
+}

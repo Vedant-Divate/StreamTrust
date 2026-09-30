@@ -1,0 +1,32 @@
+{
+  "resourceType": "ValueSet",
+  "url": "http://localhost:3000/fhir/ValueSet/stream-indicator-value-algae",
+  "name": "StreamIndicatorValueAlgae",
+  "title": "StreamTrust values for Green film or growth on the surface?",
+  "status": "active",
+  "compose": {
+    "include": [
+      {
+        "system": "http://localhost:3000/fhir/CodeSystem/stream-indicator-value",
+        "concept": [
+          {
+            "code": "algae-none",
+            "display": "None"
+          },
+          {
+            "code": "algae-patches",
+            "display": "Some patches"
+          },
+          {
+            "code": "algae-heavy",
+            "display": "Covers a lot"
+          },
+          {
+            "code": "algae-not_applicable",
+            "display": "Not applicable"
+          }
+        ]
+      }
+    ]
+  }
+}

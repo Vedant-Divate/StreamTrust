@@ -1,0 +1,40 @@
+{
+  "resourceType": "CodeSystem",
+  "url": "http://localhost:3000/fhir/CodeSystem/stream-indicator",
+  "name": "StreamIndicator",
+  "title": "StreamTrust stream indicators",
+  "status": "active",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "clarity",
+      "display": "How clear is the water?",
+      "definition": "Turbidity"
+    },
+    {
+      "code": "color",
+      "display": "What colour is the water?",
+      "definition": "Water colour / possible algal pigments"
+    },
+    {
+      "code": "algae",
+      "display": "Green film or growth on the surface?",
+      "definition": "Algal cover"
+    },
+    {
+      "code": "litter",
+      "display": "Litter or debris visible?",
+      "definition": "Anthropogenic debris"
+    },
+    {
+      "code": "flow",
+      "display": "How is the water moving?",
+      "definition": "Flow regime"
+    },
+    {
+      "code": "odor",
+      "display": "Does it smell?",
+      "definition": "Odour (sensory indicator)"
+    }
+  ]
+}

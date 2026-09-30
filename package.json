@@ -11,6 +11,7 @@
     "test": "vitest run",
     "verify": "pnpm typecheck && pnpm lint && pnpm test && pnpm build",
     "db:generate": "drizzle-kit generate",
+    "fhir:terminology": "pnpm dlx tsx scripts/generate-fhir-terminology.ts",
     "prepare": "husky"
   },
   "dependencies": {
@@ -31,6 +32,7 @@
     "@commitlint/config-conventional": "^21.2.3",
     "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
+    "@types/fhir": "^0.0.44",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

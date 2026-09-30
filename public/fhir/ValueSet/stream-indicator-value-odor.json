@@ -1,0 +1,36 @@
+{
+  "resourceType": "ValueSet",
+  "url": "http://localhost:3000/fhir/ValueSet/stream-indicator-value-odor",
+  "name": "StreamIndicatorValueOdor",
+  "title": "StreamTrust values for Does it smell?",
+  "status": "active",
+  "compose": {
+    "include": [
+      {
+        "system": "http://localhost:3000/fhir/CodeSystem/stream-indicator-value",
+        "concept": [
+          {
+            "code": "odor-none",
+            "display": "No smell"
+          },
+          {
+            "code": "odor-earthy",
+            "display": "Earthy or musty"
+          },
+          {
+            "code": "odor-sewage_like",
+            "display": "Sewage-like"
+          },
+          {
+            "code": "odor-chemical_like",
+            "display": "Chemical-like"
+          },
+          {
+            "code": "odor-not_applicable",
+            "display": "Not applicable"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "resourceType": "ValueSet",
+  "url": "http://localhost:3000/fhir/ValueSet/stream-indicator-value-clarity",
+  "name": "StreamIndicatorValueClarity",
+  "title": "StreamTrust values for How clear is the water?",
+  "status": "active",
+  "compose": {
+    "include": [
+      {
+        "system": "http://localhost:3000/fhir/CodeSystem/stream-indicator-value",
+        "concept": [
+          {
+            "code": "clarity-clear",
+            "display": "Clear"
+          },
+          {
+            "code": "clarity-slightly_cloudy",
+            "display": "Slightly cloudy"
+          },
+          {
+            "code": "clarity-cloudy",
+            "display": "Cloudy"
+          },
+          {
+            "code": "clarity-muddy",
+            "display": "Muddy or opaque"
+          },
+          {
+            "code": "clarity-not_applicable",
+            "display": "Not applicable"
+          }
+        ]
+      }
+    ]
+  }
+}

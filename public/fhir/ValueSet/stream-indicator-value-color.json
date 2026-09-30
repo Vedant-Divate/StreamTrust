@@ -1,0 +1,36 @@
+{
+  "resourceType": "ValueSet",
+  "url": "http://localhost:3000/fhir/ValueSet/stream-indicator-value-color",
+  "name": "StreamIndicatorValueColor",
+  "title": "StreamTrust values for What colour is the water?",
+  "status": "active",
+  "compose": {
+    "include": [
+      {
+        "system": "http://localhost:3000/fhir/CodeSystem/stream-indicator-value",
+        "concept": [
+          {
+            "code": "color-colorless",
+            "display": "No noticeable colour"
+          },
+          {
+            "code": "color-green",
+            "display": "Green tint"
+          },
+          {
+            "code": "color-brown",
+            "display": "Brown or tea tint"
+          },
+          {
+            "code": "color-unusual",
+            "display": "Unusual colour"
+          },
+          {
+            "code": "color-not_applicable",
+            "display": "Not applicable"
+          }
+        ]
+      }
+    ]
+  }
+}

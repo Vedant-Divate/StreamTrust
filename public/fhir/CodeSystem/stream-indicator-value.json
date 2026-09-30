@@ -1,0 +1,145 @@
+{
+  "resourceType": "CodeSystem",
+  "url": "http://localhost:3000/fhir/CodeSystem/stream-indicator-value",
+  "name": "StreamIndicatorValue",
+  "title": "StreamTrust stream indicator values",
+  "status": "active",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "clarity-clear",
+      "display": "Clear",
+      "definition": "You can see through the water easily."
+    },
+    {
+      "code": "clarity-slightly_cloudy",
+      "display": "Slightly cloudy",
+      "definition": "The water looks a little hazy."
+    },
+    {
+      "code": "clarity-cloudy",
+      "display": "Cloudy",
+      "definition": "You cannot see through the water."
+    },
+    {
+      "code": "clarity-muddy",
+      "display": "Muddy or opaque",
+      "definition": "The water looks thick with mud, often after rain."
+    },
+    {
+      "code": "clarity-not_applicable",
+      "display": "Not applicable",
+      "definition": "There is no water to describe because the stream bed is dry."
+    },
+    {
+      "code": "color-colorless",
+      "display": "No noticeable colour",
+      "definition": "The water has no real colour of its own."
+    },
+    {
+      "code": "color-green",
+      "display": "Green tint",
+      "definition": "The water looks green, which can mean tiny floating plants."
+    },
+    {
+      "code": "color-brown",
+      "display": "Brown or tea tint",
+      "definition": "The water looks brown like tea, often from soil or leaves."
+    },
+    {
+      "code": "color-unusual",
+      "display": "Unusual colour",
+      "definition": "Milky, orange, black, or any colour that looks out of place."
+    },
+    {
+      "code": "color-not_applicable",
+      "display": "Not applicable",
+      "definition": "There is no water to describe because the stream bed is dry."
+    },
+    {
+      "code": "algae-none",
+      "display": "None",
+      "definition": "No green film or growth on the water."
+    },
+    {
+      "code": "algae-patches",
+      "display": "Some patches",
+      "definition": "You can see small spots of green film or growth."
+    },
+    {
+      "code": "algae-heavy",
+      "display": "Covers a lot",
+      "definition": "Green film or growth covers much of the surface."
+    },
+    {
+      "code": "algae-not_applicable",
+      "display": "Not applicable",
+      "definition": "There is no water to describe because the stream bed is dry."
+    },
+    {
+      "code": "litter-none",
+      "display": "None",
+      "definition": "You cannot see any litter or rubbish."
+    },
+    {
+      "code": "litter-some",
+      "display": "A little",
+      "definition": "You can see one or two pieces of litter."
+    },
+    {
+      "code": "litter-a_lot",
+      "display": "A lot",
+      "definition": "Litter is easy to see in many places."
+    },
+    {
+      "code": "flow-dry",
+      "display": "No water",
+      "definition": "The stream bed is dry."
+    },
+    {
+      "code": "flow-standing",
+      "display": "Still",
+      "definition": "The water is not moving."
+    },
+    {
+      "code": "flow-slow",
+      "display": "Slow",
+      "definition": "The water moves gently."
+    },
+    {
+      "code": "flow-moderate",
+      "display": "Moderate",
+      "definition": "The water moves at a steady pace."
+    },
+    {
+      "code": "flow-fast",
+      "display": "Fast",
+      "definition": "The water rushes past quickly."
+    },
+    {
+      "code": "odor-none",
+      "display": "No smell",
+      "definition": "You cannot smell anything unusual."
+    },
+    {
+      "code": "odor-earthy",
+      "display": "Earthy or musty",
+      "definition": "It smells like soil after rain."
+    },
+    {
+      "code": "odor-sewage_like",
+      "display": "Sewage-like",
+      "definition": "It smells like a blocked toilet or drain."
+    },
+    {
+      "code": "odor-chemical_like",
+      "display": "Chemical-like",
+      "definition": "It smells sharp, like fuel, paint, or cleaning products."
+    },
+    {
+      "code": "odor-not_applicable",
+      "display": "Not applicable",
+      "definition": "There is no water to describe because the stream bed is dry."
+    }
+  ]
+}
