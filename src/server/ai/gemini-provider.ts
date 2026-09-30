@@ -1,9 +1,10 @@
 /**
- * Secondary Gemini provider (ADR-0008). Model ID confirmed against
- * Google's live docs on 2026-09-30: `gemini-2.5-flash` (stable,
- * vision-in, function-calling and structured-output capable). The
- * `-image` (Nano Banana) variants generate images and are NOT used here.
- * Compile-checked; live testing is optional (see the Phase 4 gate).
+ * Secondary Gemini provider (ADR-0008). Default model live-verified on
+ * 2026-09-30: `gemini-3.8-flash` reads a test image correctly over the
+ * API. (`gemini-2.5-flash` returns 404 "no longer available to new users"
+ * for current keys; see phase-4-preflight.md.)
+ * Compile-checked plus one live describe call; full suggest-flow testing
+ * is optional (see the Phase 4 gate).
  */
 import { SYSTEM_PROMPT } from "@/server/ai/prompt";
 import {
@@ -13,7 +14,7 @@ import {
   type SuggestInput,
 } from "@/server/ai/provider";
 
-export const GEMINI_DEFAULT_MODEL = "gemini-2.5-flash";
+export const GEMINI_DEFAULT_MODEL = "gemini-3.8-flash";
 
 const EXTRACTION_INSTRUCTION = `Assess these stream indicators from the attached photo(s) and return ONLY this JSON shape, no other text:
 {"image_quality": "ok | blurry | too_dark | no_water_visible", "indicators": [{"indicator": "<code>", "value": "<code or cannot_determine>", "confidence": <0-1>, "evidence": "<max 240 chars>", "visible_cues": ["<cue>"]}]}`;
