@@ -178,10 +178,18 @@ export async function getAssessmentView(db: DbClient, assessmentId: string) {
   if (!assessment) return undefined;
   const [site] = await db.select().from(sites).where(eq(sites.id, assessment.siteId));
   const entries = await getIndicatorEntries(db, assessmentId);
-  const suggestions = await db
+  const suggestionRows = await db
     .select()
     .from(aiSuggestions)
     .where(eq(aiSuggestions.assessmentId, assessmentId));
+  // Public snake_case shape, matching POST /suggest responses.
+  const suggestions = suggestionRows.map((s) => ({
+    indicator: s.indicator,
+    suggested_value: s.suggestedValue,
+    confidence_band: s.confidenceBand,
+    evidence: s.evidence,
+    cues: JSON.parse(s.cuesJson) as string[],
+  }));
   const photoMeta = await db
     .select({
       id: photos.id,

@@ -13,6 +13,7 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     env: {
       DATABASE_URL: "file:./e2e.db",
+      AI_PROVIDER: "mock",
     },
   },
 });
