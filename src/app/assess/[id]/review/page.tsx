@@ -11,6 +11,13 @@ interface Entry {
   finalValue: string;
 }
 
+interface ValidationResult {
+  ruleId: string;
+  severity: "error" | "warning" | "info";
+  indicators: string[];
+  message: string;
+}
+
 interface View {
   assessment: {
     id: string;
@@ -31,6 +38,10 @@ export default function Review() {
   const [loadError, setLoadError] = useState("");
   const [status, setStatus] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [results, setResults] = useState<ValidationResult[] | null>(null);
+  const [waiver, setWaiver] = useState(false);
+  const [acked, setAcked] = useState<Set<string>>(new Set());
+  const [dismissed, setDismissed] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     let cancelled = false;
@@ -57,15 +68,69 @@ export default function Review() {
     };
   }, [id, router]);
 
+  useEffect(() => {
+    if (!view) return;
+    let cancelled = false;
+    fetch(`/api/assessments/${id}/validate`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ photo_waiver: waiver }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("validate failed");
+        return res.json() as Promise<{ results: ValidationResult[] }>;
+      })
+      .then(
+        (data) => {
+          if (!cancelled) setResults(data.results);
+        },
+        () => {
+          if (!cancelled) setResults([]);
+        }
+      );
+    return () => {
+      cancelled = true;
+    };
+  }, [id, view, waiver]);
+
+  async function acknowledge(ruleId: string) {
+    const res = await fetch(`/api/assessments/${id}/acks`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ rule_id: ruleId }),
+    });
+    if (res.ok) setAcked((prev) => new Set(prev).add(ruleId));
+  }
+
   async function onSubmit() {
     setSubmitting(true);
     setStatus("");
+    const revalidate = async () => {
+      try {
+        const res = await fetch(`/api/assessments/${id}/validate`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ photo_waiver: waiver }),
+        });
+        if (res.ok) {
+          const data = (await res.json()) as { results: ValidationResult[] };
+          setResults(data.results);
+        }
+      } catch {
+        // Validation display is best-effort; submit enforces server-side.
+      }
+    };
     try {
-      const res = await fetch(`/api/assessments/${id}/submit`, { method: "POST" });
+      const res = await fetch(`/api/assessments/${id}/submit`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ photo_waiver: waiver }),
+      });
       if (!res.ok) {
         const body = (await res.json().catch(() => null)) as {
-          error?: { message?: string };
+          error?: { message?: string; details?: unknown };
         } | null;
+        await revalidate();
         throw new Error(body?.error?.message ?? COPY.submitError);
       }
       router.push(`/assess/${id}/done`);
@@ -81,6 +146,10 @@ export default function Review() {
   const valueOf = (code: string) => view.entries.find((e) => e.indicator === code)?.finalValue;
   const missing = INDICATORS.filter((d) => !valueOf(d.code));
   const complete = missing.length === 0;
+  const errors = (results ?? []).filter((r) => r.severity === "error");
+  const warnings = (results ?? []).filter((r) => r.severity === "warning");
+  const infos = (results ?? []).filter((r) => r.severity === "info" && !dismissed.has(r.ruleId));
+  const showWaiver = view.photos.length === 0;
 
   return (
     <div className="flex flex-col gap-5">
@@ -101,6 +170,20 @@ export default function Review() {
           <dd>{view.photos.length}</dd>
         </dl>
         {view.assessment.notes && <p className="pt-2 text-sm">{view.assessment.notes}</p>}
+        {showWaiver && (
+          <div className="mt-3 flex items-start gap-3 rounded-lg border p-3">
+            <input
+              id="waiver"
+              type="checkbox"
+              checked={waiver}
+              onChange={(e) => setWaiver(e.target.checked)}
+              className="mt-1 h-6 w-6 shrink-0 accent-primary"
+            />
+            <label htmlFor="waiver" className="text-sm">
+              {COPY.waiverLabel}
+            </label>
+          </div>
+        )}
       </section>
 
       <section aria-label="Answers" className="flex flex-col gap-2">
@@ -120,6 +203,63 @@ export default function Review() {
           })}
         </dl>
       </section>
+
+      {errors.length > 0 && (
+        <section
+          aria-label={COPY.errorsTitle}
+          role="alert"
+          className="flex flex-col gap-2 rounded-lg border border-destructive p-4"
+        >
+          <h2 className="font-semibold text-destructive">{COPY.errorsTitle}</h2>
+          <ul className="flex flex-col gap-1 text-sm">
+            {errors.map((r) => (
+              <li key={r.ruleId}>{r.message}</li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {warnings.length > 0 && (
+        <section aria-label={COPY.warningsTitle} className="flex flex-col gap-3">
+          <h2 className="font-semibold">{COPY.warningsTitle}</h2>
+          {warnings.map((w) => (
+            <div key={w.ruleId} className="flex flex-col gap-2 rounded-lg border p-3">
+              <p className="text-sm">{w.message}</p>
+              {acked.has(w.ruleId) ? (
+                <p className="text-sm font-medium">✓ {COPY.acknowledgedLabel}</p>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => void acknowledge(w.ruleId)}
+                  className="inline-flex min-h-[44px] items-center justify-center rounded-lg border px-4 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                >
+                  {COPY.acknowledgeButton}
+                </button>
+              )}
+            </div>
+          ))}
+        </section>
+      )}
+
+      {infos.length > 0 && (
+        <section aria-label={COPY.infoTitle} className="flex flex-col gap-2">
+          <h2 className="font-semibold">{COPY.infoTitle}</h2>
+          {infos.map((info) => (
+            <div key={info.ruleId} className="flex flex-col gap-1 rounded-lg bg-muted p-3">
+              <p className="text-sm">{info.message}</p>
+              <div>
+                <button
+                  type="button"
+                  onClick={() => setDismissed((prev) => new Set(prev).add(info.ruleId))}
+                  className="inline-flex min-h-[44px] items-center rounded px-2 text-sm underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                >
+                  {COPY.dismissButton}
+                </button>
+              </div>
+            </div>
+          ))}
+        </section>
+      )}
 
       {!complete && (
         <p role="alert" className="rounded-lg bg-muted p-3 text-sm">
