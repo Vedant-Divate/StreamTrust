@@ -36,28 +36,36 @@ were confabulated onto a synthetic bands pattern (not water) — this run
 proves the path and the timing, not accuracy. Accuracy is measured on
 real photos by the Phase 8 eval set, not here.
 
-## 4. Deployed URL attempt (blocked, needs human)
+## 4. Deployed URL run (done 2026-09-30, after env was configured)
 
-`https://streamtrust.vercel.app/` landing is current, but **every API
-route returns empty HTTP 500** (probed `/api/health` and
-`POST /api/assessments` on 2026-09-30) — the production deployment has
-no working database (likely missing/invalid `DATABASE_URL`), and with
-no DB there is no photo storage, no suggestions, and no place a
-`NIM_API_KEY` could take effect. This agent has no Vercel access, so it
-cannot set env vars or run migrations.
+The block cleared the same day: Turso env vars were set in Vercel,
+the 9 tables were migrated to Turso (verified via `sqlite_master`),
+and the deployment picked up the env (no code change needed).
+`/api/health` now returns `{"status":"ok","db":"up","aiProvider":"nim",…}`.
 
-To unblock, a human with Vercel access must, in the project Settings →
-Environment Variables (Production):
+Full live flow on `https://streamtrust.vercel.app` (real key, new
+llama default, timings are client-measured):
 
-1. `DATABASE_URL` = Turso `libsql://…` URL
-2. `DATABASE_AUTH_TOKEN` = Turso token
-3. `NIM_API_KEY` = NIM key (server-side only, never `NEXT_PUBLIC_`)
-4. `AI_MODEL` = `meta/llama-3.2-11b-vision-instruct`
-5. `AI_PROVIDER` = `nim`
-6. Apply the Drizzle migrations in `src/server/db/migrations/` to the
-   Turso database once (e.g. a one-off `drizzle-kit migrate` run
-   against it), redeploy, and confirm `/api/health` returns
-   `{"status":"ok","db":"up",…}`.
+- DRAFT 201 (`84aae4df-…`), UPLOAD 201 (320×240 parsed)
+- SUGGEST **200 in 32,477 ms**: 6 suggestions
+  (clarity/clear/high, color/green/medium, algae/none/medium,
+  litter/none/medium, flow/moderate/low, odor/cannot_determine/none),
+  `provider: nim`, `model: meta/llama-3.2-11b-vision-instruct`,
+  `deduped: false`
+- PATCH 200 (accepted clarity=clear, overrode the rest), SUBMIT 200
+- Final rows: clarity `ai_accepted`, algae `ai_accepted`, litter
+  `ai_accepted`, color `human_override`, flow `human_override`, odor
+  `human_only` — every `ai_accepted`/`human_override` row links to its
+  suggestion row; `human_only` links null. Exactly the Section 7.2 rule.
 
-After that, say the word and the deployed-URL suggest timing run will
-be executed and pasted here.
+Two things this run proves at once: the new default completes with
+margin under the 40 s ceiling (7.5 s to spare), and it would have
+timed out under the old 25 s ceiling — the ADR-0009 raise was
+necessary, not just precautionary. (An earlier 18.7 s run the same
+morning shows the usual free-tier variance in both directions.)
+
+Cleanup note: one orphan draft from the blocked-probe phase remains in
+the Turso DB (`d7cedc88-…`, suggestions stored, no entries, never
+submitted; owner cookie unknown). It carries no entries so it cannot
+pose as a completed record; delete it via the Turso dashboard if a
+pristine prod DB is wanted before demo traffic.
