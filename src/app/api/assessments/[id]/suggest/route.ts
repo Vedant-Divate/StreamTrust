@@ -33,15 +33,17 @@ const SUGGEST_LIMIT_PER_HOUR = 10;
 type Ctx = { params: Promise<{ id: string }> };
 
 async function getProvider(): Promise<AssessmentProvider> {
-  const name = process.env.AI_PROVIDER ?? "mock";
+  const name = process.env.AI_PROVIDER ?? "nim";
   if (name === "mock") return new MockProvider();
   if (name === "gemini") {
     const { GeminiProvider } = await import("@/server/ai/gemini-provider");
     return new GeminiProvider();
   }
-  return Promise.reject(
-    Object.assign(new Error(`Provider '${name}' is not available yet.`), { status: 501 })
-  );
+  if (name === "nim") {
+    const { NimProvider } = await import("@/server/ai/nim-provider");
+    return new NimProvider();
+  }
+  throw Object.assign(new Error(`Unknown AI_PROVIDER '${name}'.`), { status: 500 });
 }
 
 function photoSetHash(sha256s: string[]): string {
