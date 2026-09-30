@@ -13,6 +13,7 @@
     "db:generate": "drizzle-kit generate",
     "fhir:terminology": "pnpm dlx tsx scripts/generate-fhir-terminology.ts",
     "seed:demo": "pnpm dlx tsx scripts/seed-demo.ts",
+    "eval:ai": "pnpm dlx tsx scripts/eval-ai.ts",
     "prepare": "husky"
   },
   "dependencies": {
@@ -29,6 +30,7 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@commitlint/cli": "^21.2.3",
     "@commitlint/config-conventional": "^21.2.3",
     "@playwright/test": "^1.63.0",
