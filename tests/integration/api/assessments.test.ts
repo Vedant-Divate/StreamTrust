@@ -195,6 +195,38 @@ describe("PATCH /api/assessments/:id", () => {
     expect(res.status).toBe(400);
   });
 
+  it("clears entries sent with a null final_value", async () => {
+    const { json, cookie } = await createDraft();
+    const id = json.assessment.id;
+    const headers = { "content-type": "application/json", cookie: `st_vid=${cookie}` };
+    const patch = (entries: unknown) =>
+      PATCH_ONE(
+        new Request(`http://localhost/api/assessments/${id}`, {
+          method: "PATCH",
+          headers,
+          body: JSON.stringify({ entries }),
+        }),
+        ctxFor(id)
+      );
+
+    // Dry bed: flow=dry plus not_applicable appearance values.
+    await patch([
+      { indicator: "flow", final_value: "dry" },
+      { indicator: "clarity", final_value: "not_applicable" },
+    ]);
+    // Leaving dry: flow changes and the stale N/A is cleared in one call.
+    const res = await patch([
+      { indicator: "flow", final_value: "slow" },
+      { indicator: "clarity", final_value: null },
+    ]);
+    expect(res.status).toBe(200);
+    const view = (await res.json()) as { entries: { indicator: string; finalValue: string }[] };
+    expect(view.entries.find((e) => e.indicator === "flow")).toMatchObject({
+      finalValue: "slow",
+    });
+    expect(view.entries.find((e) => e.indicator === "clarity")).toBeUndefined();
+  });
+
   it("refuses edits once submitted (409)", async () => {
     const { json, cookie } = await createDraft();
     const id = json.assessment.id;

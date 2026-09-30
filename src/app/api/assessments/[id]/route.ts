@@ -9,6 +9,7 @@ import { z } from "zod";
 import { indicatorEntrySchema } from "@/domain/schemas";
 import { db } from "@/server/db/client";
 import {
+  deleteIndicatorEntry,
   getAssessmentView,
   updateAssessmentDraft,
   upsertIndicatorEntry,
@@ -29,7 +30,9 @@ const patchSchema = z.object({
   observed_at: z.string().optional(),
   rain_last_24h: z.string().optional(),
   notes: z.string().max(2000).nullable().optional(),
-  entries: z.array(z.object({ indicator: z.string(), final_value: z.string() })).optional(),
+  entries: z
+    .array(z.object({ indicator: z.string(), final_value: z.string().nullable() }))
+    .optional(),
 });
 
 export async function PATCH(req: Request, ctx: Ctx) {
@@ -72,6 +75,13 @@ export async function PATCH(req: Request, ctx: Ctx) {
 
   if (raw.data.entries !== undefined) {
     for (const e of raw.data.entries) {
+      // `final_value: null` clears the entry (e.g. removing a stale
+      // `not_applicable` when flow leaves `dry`); the question becomes
+      // unanswered and the human must answer it again.
+      if (e.final_value === null) {
+        await deleteIndicatorEntry(db, id, e.indicator);
+        continue;
+      }
       const entry = indicatorEntrySchema.safeParse({
         indicator: e.indicator,
         finalValue: e.final_value,

@@ -67,7 +67,7 @@ export default function Wizard() {
     };
   }, [id]);
 
-  async function saveEntries(entries: { indicator: string; final_value: string }[]) {
+  async function saveEntries(entries: { indicator: string; final_value: string | null }[]) {
     const seq = ++saveSeq.current;
     setSaveState("saving");
     try {
@@ -88,12 +88,21 @@ export default function Wizard() {
   }
 
   function selectValue(indicator: IndicatorCode, value: string) {
-    const entries: { indicator: string; final_value: string }[] = [
+    const entries: { indicator: string; final_value: string | null }[] = [
       { indicator, final_value: value },
     ];
     if (indicator === "flow" && value === "dry") {
       for (const other of NOT_APPLICABLE_INDICATORS) {
         entries.push({ indicator: other, final_value: NOT_APPLICABLE });
+      }
+    }
+    if (indicator === "flow" && value !== "dry" && view) {
+      // Leaving `dry`: clear stale `not_applicable` values so the human
+      // answers those questions again instead of submitting stale data.
+      for (const other of NOT_APPLICABLE_INDICATORS) {
+        if (view.entries.find((e) => e.indicator === other)?.finalValue === NOT_APPLICABLE) {
+          entries.push({ indicator: other, final_value: null });
+        }
       }
     }
     void saveEntries(entries);

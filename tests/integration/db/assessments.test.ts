@@ -4,6 +4,7 @@ import {
   createAssessment,
   createSite,
   createVolunteer,
+  deleteIndicatorEntry,
   getAssessmentById,
   getIndicatorEntries,
   updateAssessmentDraft,
@@ -92,5 +93,33 @@ describe("assessment repository", () => {
     const entries = await getIndicatorEntries(ctx.db, created!.id);
     expect(entries).toHaveLength(1);
     expect(entries[0]).toMatchObject({ indicator: "clarity", finalValue: "muddy" });
+  });
+
+  it("deletes a single indicator entry", async () => {
+    const volunteer = await createVolunteer(ctx.db);
+    const site = await createSite(ctx.db, { lat: 1, lng: 1 });
+    const created = await createAssessment(ctx.db, {
+      volunteerId: volunteer.id,
+      siteId: site.id,
+      observedAt: "2026-09-29T08:00:00.000Z",
+      rainLast24h: "none",
+    });
+
+    await upsertIndicatorEntry(ctx.db, {
+      assessmentId: created!.id,
+      indicator: "clarity",
+      finalValue: "not_applicable",
+      decisionSource: "human_only",
+    });
+    await upsertIndicatorEntry(ctx.db, {
+      assessmentId: created!.id,
+      indicator: "flow",
+      finalValue: "dry",
+      decisionSource: "human_only",
+    });
+    await deleteIndicatorEntry(ctx.db, created!.id, "clarity");
+
+    const entries = await getIndicatorEntries(ctx.db, created!.id);
+    expect(entries.map((e) => e.indicator)).toEqual(["flow"]);
   });
 });

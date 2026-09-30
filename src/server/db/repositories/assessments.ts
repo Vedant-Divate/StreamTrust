@@ -4,7 +4,7 @@
  * no decision_source computation; those belong to later phases).
  */
 import { randomUUID } from "node:crypto";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import type { DbClient } from "@/server/db/client";
 import {
   aiSuggestions,
@@ -133,6 +133,18 @@ export async function upsertIndicatorEntry(db: DbClient, input: UpsertEntryInput
 
 export async function getIndicatorEntries(db: DbClient, assessmentId: string) {
   return db.select().from(indicatorEntries).where(eq(indicatorEntries.assessmentId, assessmentId));
+}
+
+/** Remove one indicator entry (e.g. clearing a stale `not_applicable`). */
+export async function deleteIndicatorEntry(db: DbClient, assessmentId: string, indicator: string) {
+  await db
+    .delete(indicatorEntries)
+    .where(
+      and(
+        eq(indicatorEntries.assessmentId, assessmentId),
+        eq(indicatorEntries.indicator, indicator)
+      )
+    );
 }
 
 /**
