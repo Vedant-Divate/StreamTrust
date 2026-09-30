@@ -103,6 +103,19 @@ export const COPY = {
     "a standards-format view arrives in a later step.",
   viewData: "Your data",
   downloadJson: "Download JSON",
+  fhirBundleTitle: "FHIR health-data bundle",
+  fhirValidateButton: "Validate with FHIR validator",
+  fhirValidating: "Validating…",
+  fhirNotice:
+    "This sends a copy of this bundle to the public HAPI FHIR test " +
+    "server for checking. The bundle holds only your rounded location, " +
+    "answers, and an anonymous volunteer ID — no names. That public " +
+    "server is shared: never send sensitive data through it.",
+  fhirDownloadBundle: "Download Bundle (.json)",
+  fhirErrors: "errors",
+  fhirWarnings: "warnings",
+  fhirNoIssues: "No issues reported.",
+  fhirValidateError: "Validation failed. Try again later.",
   getSuggestions: "Get AI suggestions",
   suggestionsLoading: "Asking the AI…",
   suggestionsFailed: "The AI is unavailable. Continue manually.",
