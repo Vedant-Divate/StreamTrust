@@ -15,6 +15,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { PROMPT_VERSION } from "../src/server/ai/prompt";
 import { NimProvider } from "../src/server/ai/nim-provider";
+import { ProviderError } from "../src/server/ai/provider";
 import { normalizeSuggestions } from "../src/server/ai/normalize";
 
 const FIXTURES = join(__dirname, "..", "tests", "fixtures", "eval");
@@ -53,17 +54,28 @@ async function main() {
 
   for (const image of images) {
     const bytes = readFileSync(join(FIXTURES, image));
+    const input = {
+      images: [{ mime: "image/jpeg" as const, base64: bytes.toString("base64") }],
+      rainLast24h: "unknown" as const,
+      promptVersion: PROMPT_VERSION,
+    };
+    // One retry on retryable failures, mirroring the production suggest
+    // route — the eval measures the pipeline users actually get.
     let suggestions: ReturnType<typeof normalizeSuggestions> = [];
-    try {
-      const raw = await provider.suggest({
-        images: [{ mime: "image/jpeg", base64: bytes.toString("base64") }],
-        rainLast24h: "unknown",
-        promptVersion: PROMPT_VERSION,
-      });
-      suggestions = normalizeSuggestions(raw);
-    } catch (err) {
+    let failed: Error | null = null;
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        suggestions = normalizeSuggestions(await provider.suggest(input));
+        failed = null;
+        break;
+      } catch (err) {
+        failed = err as Error;
+        if (!(err instanceof ProviderError && err.retryable)) break;
+      }
+    }
+    if (failed) {
       errored += 1;
-      rows.push(`| ${image} | — | provider error: ${(err as Error).message} |`);
+      rows.push(`| ${image} | — | provider error: ${failed.message} |`);
       continue;
     }
     for (const { indicator, label } of labels.filter((l) => l.image === image)) {
