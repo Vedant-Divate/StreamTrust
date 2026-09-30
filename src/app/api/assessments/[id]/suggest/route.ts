@@ -3,7 +3,7 @@
  * photos and store them (owner only, draft only).
  * - DB-backed rate limit: 10 calls per volunteer per hour (Section 8.4)
  * - Idempotent per (assessment, photo set) unless `rerun: true`
- * - 25 s timeout; one retry only on schema failure or retryable error
+ * - 40 s timeout (ADR-0009); one retry only on schema failure or retryable error
  * - Raw provider payload is stored on every call for auditability
  */
 import { createHash, randomUUID } from "node:crypto";
@@ -25,9 +25,9 @@ import { normalizeSuggestions } from "@/server/ai/normalize";
 import { errorBody, requireOwnedAssessment } from "@/server/security/volunteer-cookie";
 import { RAIN_LAST_24H_CODES, type RainLast24h } from "@/domain/vocab";
 
-export const maxDuration = 60;
+export const maxDuration = 120;
 
-const SUGGEST_TIMEOUT_MS = 25_000;
+const SUGGEST_TIMEOUT_MS = 40_000;
 const SUGGEST_LIMIT_PER_HOUR = 10;
 
 type Ctx = { params: Promise<{ id: string }> };
