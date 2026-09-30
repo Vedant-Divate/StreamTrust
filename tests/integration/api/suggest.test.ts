@@ -21,6 +21,8 @@ const dbFile = join(tmpdir(), `st-suggest-test-${process.pid}-${Date.now()}.db`)
 
 let POST_DRAFT: (req: Request) => Promise<Response>;
 let POST_PHOTO: (req: Request, ctx: { params: Promise<{ id: string }> }) => Promise<Response>;
+let PATCH_ONE: (req: Request, ctx: { params: Promise<{ id: string }> }) => Promise<Response>;
+let POST_SUBMIT: (req: Request, ctx: { params: Promise<{ id: string }> }) => Promise<Response>;
 let POST_SUGGEST: (req: Request, ctx: { params: Promise<{ id: string }> }) => Promise<Response>;
 let setupDb: TestDb;
 let setupClient: Client;
@@ -86,6 +88,9 @@ beforeAll(async () => {
 
   ({ POST: POST_DRAFT } = await import("@/app/api/assessments/route"));
   ({ POST: POST_PHOTO } = await import("@/app/api/assessments/[id]/photos/route"));
+  const one = await import("@/app/api/assessments/[id]/route");
+  PATCH_ONE = one.PATCH;
+  ({ POST: POST_SUBMIT } = await import("@/app/api/assessments/[id]/submit/route"));
   ({ POST: POST_SUGGEST } = await import("@/app/api/assessments/[id]/suggest/route"));
   void setupDb;
 });
@@ -182,5 +187,56 @@ describe("POST /api/assessments/:id/suggest (mock)", () => {
       .where(eq(assessments.id, json.assessment.id));
     const frozen = await suggest(json.assessment.id, cookie);
     expect(frozen.status).toBe(409);
+  });
+
+  it("computes decision_source server-side at submit", async () => {
+    const { id, cookie } = await createDraftWithPhoto();
+    // Mock suggestions: clarity=cloudy, color=brown, algae=patches,
+    // litter/flow/odor abstain. Answer a mix of accept/override/human-only.
+    const patched = await PATCH_ONE(
+      new Request(`http://localhost/api/assessments/${id}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json", cookie: `st_vid=${cookie}` },
+        body: JSON.stringify({
+          entries: [
+            { indicator: "clarity", final_value: "cloudy" },
+            { indicator: "color", final_value: "green" },
+            { indicator: "algae", final_value: "patches" },
+            { indicator: "litter", final_value: "some" },
+            { indicator: "flow", final_value: "slow" },
+            { indicator: "odor", final_value: "earthy" },
+          ],
+        }),
+      }),
+      { params: Promise.resolve({ id }) }
+    );
+    expect(patched.status).toBe(200);
+
+    const suggested = await suggest(id, cookie);
+    expect(suggested.status).toBe(200);
+
+    const submitted = await POST_SUBMIT(
+      new Request(`http://localhost/api/assessments/${id}/submit`, {
+        method: "POST",
+        headers: { cookie: `st_vid=${cookie}` },
+      }),
+      { params: Promise.resolve({ id }) }
+    );
+    expect(submitted.status).toBe(200);
+
+    const rows = await getSuggestionsByAssessment(setupDb, id);
+    const suggestionIds = new Set(rows.map((r) => r.id));
+    const { getIndicatorEntries } = await import("@/server/db/repositories/assessments");
+    const entries = await getIndicatorEntries(setupDb, id);
+    const byIndicator = Object.fromEntries(entries.map((e) => [e.indicator, e]));
+    expect(byIndicator.clarity).toMatchObject({ decisionSource: "ai_accepted" });
+    expect(byIndicator.color).toMatchObject({ decisionSource: "human_override" });
+    expect(byIndicator.algae).toMatchObject({ decisionSource: "ai_accepted" });
+    expect(byIndicator.litter).toMatchObject({ decisionSource: "human_only" });
+    expect(byIndicator.flow).toMatchObject({ decisionSource: "human_only" });
+    expect(byIndicator.odor).toMatchObject({ decisionSource: "human_only" });
+    // Linked rows point at real suggestion rows.
+    expect(suggestionIds.has(byIndicator.clarity.aiSuggestionId!)).toBe(true);
+    expect(byIndicator.odor.aiSuggestionId).toBeNull();
   });
 });

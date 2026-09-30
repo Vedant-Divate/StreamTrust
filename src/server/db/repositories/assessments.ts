@@ -135,10 +135,32 @@ export async function getIndicatorEntries(db: DbClient, assessmentId: string) {
   return db.select().from(indicatorEntries).where(eq(indicatorEntries.assessmentId, assessmentId));
 }
 
-/** Remove one indicator entry (e.g. clearing a stale `not_applicable`). */
-export async function deleteIndicatorEntry(db: DbClient, assessmentId: string, indicator: string) {
+/** Remove one indicator entry (e.g. clearing a stale `not_applicable`). */ export async function deleteIndicatorEntry(
+  db: DbClient,
+  assessmentId: string,
+  indicator: string
+) {
   await db
     .delete(indicatorEntries)
+    .where(
+      and(
+        eq(indicatorEntries.assessmentId, assessmentId),
+        eq(indicatorEntries.indicator, indicator)
+      )
+    );
+}
+
+/** Record the submit-time provenance outcome for one entry. */
+export async function setEntryDecisionSource(
+  db: DbClient,
+  assessmentId: string,
+  indicator: string,
+  decisionSource: string,
+  aiSuggestionId: string | null
+) {
+  await db
+    .update(indicatorEntries)
+    .set({ decisionSource, aiSuggestionId, updatedAt: new Date().toISOString() })
     .where(
       and(
         eq(indicatorEntries.assessmentId, assessmentId),

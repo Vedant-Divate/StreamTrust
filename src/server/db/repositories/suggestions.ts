@@ -56,3 +56,14 @@ export async function getSuggestionById(db: DbClient, id: string) {
 export async function getSuggestionsByAssessment(db: DbClient, assessmentId: string) {
   return db.select().from(aiSuggestions).where(eq(aiSuggestions.assessmentId, assessmentId));
 }
+
+/** Latest suggestion row per indicator (by creation time). */
+export async function getLatestSuggestionsByAssessment(db: DbClient, assessmentId: string) {
+  const all = await getSuggestionsByAssessment(db, assessmentId);
+  const latest = new Map<string, (typeof all)[number]>();
+  for (const row of all) {
+    const prev = latest.get(row.indicator);
+    if (!prev || prev.createdAt <= row.createdAt) latest.set(row.indicator, row);
+  }
+  return latest;
+}
