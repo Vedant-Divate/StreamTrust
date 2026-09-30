@@ -1,0 +1,187 @@
+"use client";
+
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { COPY } from "@/domain/copy";
+import { INDICATORS } from "@/domain/vocab";
+import { AgreementChart } from "@/components/insights/AgreementChart";
+import { OverrideTable } from "@/components/insights/OverrideTable";
+
+// Server response shape, repeated locally: UI code must not import
+// from src/server/** (dependency rule), so this mirrors the API output.
+interface AgreementSummary {
+  pairs: number;
+  agreed: number;
+  rate: number | null;
+  overrides: number;
+  byIndicator: {
+    indicator: string;
+    pairs: number;
+    agreed: number;
+    rate: number | null;
+    overrides: number;
+  }[];
+  byBand: { band: string; pairs: number; agreed: number; rate: number | null }[];
+}
+
+// UI must not import server code: the shape is repeated locally.
+interface InsightsResponse {
+  demo: "include" | "only" | "exclude";
+  summary: AgreementSummary;
+}
+
+const BAND_LABELS: Record<string, string> = {
+  low: "Low",
+  medium: "Medium",
+  high: "High",
+  none: "Abstained",
+};
+
+export default function Insights() {
+  return (
+    <Suspense fallback={<p aria-live="polite">…</p>}>
+      <InsightsBody />
+    </Suspense>
+  );
+}
+
+function InsightsBody() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const includeDemo = searchParams.get("demo") === "include";
+  const [data, setData] = useState<InsightsResponse | null>(null);
+  const [loadError, setLoadError] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`/api/insights?demo=${includeDemo ? "include" : "exclude"}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("load failed");
+        return res.json() as Promise<InsightsResponse>;
+      })
+      .then(
+        (data) => {
+          if (!cancelled) setData(data);
+        },
+        () => {
+          if (!cancelled) setLoadError(true);
+        }
+      );
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  function toggleDemo(checked: boolean) {
+    router.replace(`/insights${checked ? "?demo=include" : ""}`);
+  }
+
+  const labelOf = (code: string) => INDICATORS.find((d) => d.code === code)?.label ?? code;
+
+  if (loadError) return <p role="alert">{COPY.submitError}</p>;
+
+  const summary = data?.summary;
+  const showDemoBadge = includeDemo;
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight">{COPY.insightsTitle}</h1>
+        <p className="text-muted-foreground">{COPY.insightsIntro}</p>
+      </div>
+
+      {showDemoBadge && (
+        <p
+          role="note"
+          aria-label={`${COPY.demoBadge}: ${COPY.demoDataNotice}`}
+          className="rounded-lg border-2 border-dashed border-primary p-4 text-center font-semibold"
+        >
+          {COPY.demoBadge} — {COPY.demoDataNotice}
+        </p>
+      )}
+
+      <div className="flex items-center gap-3 rounded-lg border p-3">
+        <input
+          id="include-demo"
+          type="checkbox"
+          checked={includeDemo}
+          onChange={(e) => toggleDemo(e.target.checked)}
+          className="h-6 w-6 shrink-0 accent-primary"
+        />
+        <label htmlFor="include-demo" className="min-h-[44px] inline-flex items-center text-sm">
+          {COPY.includeDemo}
+        </label>
+      </div>
+
+      <div aria-live="polite" className="flex flex-col gap-6">
+        {!summary ? (
+          <p>…</p>
+        ) : summary.pairs === 0 ? (
+          <p>{COPY.noInsightsData}</p>
+        ) : (
+          <>
+            <section aria-label="Summary" className="grid grid-cols-3 gap-3">
+              <div className="rounded-lg border p-4 text-center">
+                <p className="text-3xl font-semibold">
+                  {summary.rate === null ? "—" : `${summary.rate}%`}
+                </p>
+                <p className="text-sm text-muted-foreground">{COPY.agreementRate}</p>
+              </div>
+              <div className="rounded-lg border p-4 text-center">
+                <p className="text-3xl font-semibold">{summary.pairs}</p>
+                <p className="text-sm text-muted-foreground">{COPY.comparedAnswers}</p>
+              </div>
+              <div className="rounded-lg border p-4 text-center">
+                <p className="text-3xl font-semibold">{summary.overrides}</p>
+                <p className="text-sm text-muted-foreground">{COPY.changedAnswers}</p>
+              </div>
+            </section>
+
+            <section aria-labelledby="by-q" className="flex flex-col gap-3">
+              <h2 id="by-q" className="text-xl font-semibold">
+                {COPY.byIndicatorTitle}
+              </h2>
+              <AgreementChart
+                items={summary.byIndicator.map((s) => ({
+                  key: s.indicator,
+                  label: labelOf(s.indicator),
+                  detail: `${s.agreed}/${s.pairs}`,
+                  rate: s.rate,
+                }))}
+              />
+            </section>
+
+            <section aria-labelledby="by-band" className="flex flex-col gap-3">
+              <h2 id="by-band" className="text-xl font-semibold">
+                {COPY.bandTitle}
+              </h2>
+              <AgreementChart
+                items={summary.byBand.map((s) => ({
+                  key: s.band,
+                  label: BAND_LABELS[s.band] ?? s.band,
+                  detail: `${s.agreed}/${s.pairs}`,
+                  rate: s.rate,
+                }))}
+              />
+            </section>
+
+            <section aria-labelledby="overrides" className="flex flex-col gap-3">
+              <h2 id="overrides" className="text-xl font-semibold">
+                {COPY.overridesTitle}
+              </h2>
+              <OverrideTable
+                rows={summary.byIndicator.map((s) => ({
+                  indicator: s.indicator,
+                  label: labelOf(s.indicator),
+                  overrides: s.overrides,
+                  pairs: s.pairs,
+                }))}
+              />
+            </section>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
