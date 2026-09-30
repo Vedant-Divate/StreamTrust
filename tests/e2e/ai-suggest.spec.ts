@@ -4,6 +4,7 @@
  * human_override, and abstentions show no button.
  */
 import { expect, test } from "@playwright/test";
+import { markAssessmentDemo } from "./demo-flag";
 
 test.use({ viewport: { width: 375, height: 667 } });
 
@@ -73,4 +74,6 @@ test("accept and override suggestions", async ({ page }) => {
   expect(byIndicator.clarity.decisionSource).toBe("ai_accepted");
   expect(byIndicator.color.decisionSource).toBe("human_override");
   expect(byIndicator.odor.decisionSource).toBe("human_only");
+  // Flag last: test rows must never pose as genuine submissions.
+  await markAssessmentDemo(id);
 });

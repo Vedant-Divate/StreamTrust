@@ -4,6 +4,7 @@
  * exercises keyboard operation plus the real client-side photo resize.
  */
 import { expect, test } from "@playwright/test";
+import { markAssessmentDemo } from "./demo-flag";
 
 test.use({ viewport: { width: 375, height: 667 } });
 
@@ -94,4 +95,6 @@ test("human-only happy path", async ({ page }) => {
   expect(raw).toContain('"decisionSource": "human_only"');
   expect(page.url()).toBe(wizardUrl.replace(/\/assess\/([0-9a-f-]+)$/, "/assess/$1/done"));
   await page.screenshot({ path: "docs/verification/screenshots/phase-3-done.png" });
+  // Flag last: test rows must never pose as genuine submissions.
+  await markAssessmentDemo(wizardUrl.match(/\/assess\/([0-9a-f-]+)$/)![1]);
 });

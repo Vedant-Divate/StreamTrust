@@ -3,6 +3,7 @@
  * then submit successfully — all through the real UI.
  */
 import { expect, test } from "@playwright/test";
+import { markAssessmentDemo } from "./demo-flag";
 
 test.use({ viewport: { width: 375, height: 667 } });
 
@@ -33,12 +34,18 @@ test("smell warning acknowledged then submitted", async ({ page }) => {
   });
   await expect(page.getByAltText(/Stream photo/)).toBeVisible({ timeout: 60000 });
 
-  await page.locator('label[for="clarity-clear"]').click();
-  await page.locator('label[for="color-colorless"]').click();
-  await page.locator('label[for="algae-none"]').click();
-  await page.locator('label[for="litter-none"]').click();
-  await page.locator('label[for="flow-slow"]').click();
-  await page.locator('label[for="odor-sewage_like"]').click();
+  const answers: [string, string][] = [
+    ["clarity", "clear"],
+    ["color", "colorless"],
+    ["algae", "none"],
+    ["litter", "none"],
+    ["flow", "slow"],
+    ["odor", "sewage_like"],
+  ];
+  for (const [code, value] of answers) {
+    await page.locator(`label[for="${code}-${value}"]`).click();
+    await expect(page.locator(`#${code}-${value}`)).toBeChecked();
+  }
   await expect(page.getByText("All changes saved.")).toBeVisible({ timeout: 15000 });
 
   await page.getByRole("link", { name: "Review and submit" }).click();
@@ -46,11 +53,13 @@ test("smell warning acknowledged then submitted", async ({ page }) => {
   await expect(page.getByText("You noted a strong smell")).toBeVisible();
 
   await page.getByRole("button", { name: "I understand, continue" }).click();
-  await expect(page.getByText("Acknowledged")).toBeVisible();
+  await expect(page.getByText("Acknowledged")).toBeVisible({ timeout: 30000 });
 
   await page.getByRole("button", { name: "Submit assessment" }).click();
   await expect(page).toHaveURL(/\/done$/, { timeout: 30000 });
   await expect(page.getByRole("heading", { name: "Assessment saved. Thank you!" })).toBeVisible({
     timeout: 30000,
   });
+  // Flag last: test rows must never pose as genuine submissions.
+  await markAssessmentDemo(page.url().match(/\/assess\/([0-9a-f-]+)\/done$/)![1]);
 });
