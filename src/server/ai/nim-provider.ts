@@ -148,24 +148,38 @@ export class NimProvider implements AssessmentProvider {
   }
 }
 
-function parsePayload(text: string): RawSuggestResult {
-  // Prompt-JSON models often wrap the payload in markdown fences.
+function candidates(text: string): string[] {
+  const out = [text];
+  // Prompt-JSON models often wrap the payload in markdown fences or prose.
   const unfenced = text
     .replace(/^[\s\S]*?```(?:json)?\s*/, "")
     .replace(/\s*```[\s\S]*$/, "")
     .trim();
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(unfenced) as unknown;
-  } catch {
-    throw new ProviderError("NIM returned unparseable JSON.", true);
+  if (unfenced !== text) out.push(unfenced);
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  if (start !== -1 && end > start) {
+    const sliced = text.slice(start, end + 1);
+    if (!out.includes(sliced)) out.push(sliced);
   }
-  if (
-    typeof parsed !== "object" ||
-    parsed === null ||
-    !Array.isArray((parsed as { indicators?: unknown }).indicators)
-  ) {
-    throw new ProviderError("NIM returned JSON without an indicators array.", true);
+  return out;
+}
+
+function parsePayload(text: string): RawSuggestResult {
+  for (const candidate of candidates(text)) {
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(candidate) as unknown;
+    } catch {
+      continue;
+    }
+    if (
+      typeof parsed === "object" &&
+      parsed !== null &&
+      Array.isArray((parsed as { indicators?: unknown }).indicators)
+    ) {
+      return parsed as RawSuggestResult;
+    }
   }
-  return parsed as RawSuggestResult;
+  throw new ProviderError("NIM returned unparseable JSON.", true);
 }
