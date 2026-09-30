@@ -51,3 +51,28 @@ unknown-extension _errors_.
 `OperationOutcome`, count fatal/error vs warning. Gate: zero errors.
 Results stored in `fhir_exports`. Only demo/non-sensitive data is ever
 sent (rounded coords, no names); the UI says so before sending.
+
+## Expected validator warnings
+
+Validating our Bundle against the public HAPI validator returns zero
+errors plus non-error findings in three benign, expected categories
+(concrete example from the Phase 6 gate: 12 warnings, 15 warnings, and
+10 information notices on one 15-entry Bundle). None of them indicates
+a mapping defect:
+
+- **Unknown CodeSystem (12 warnings).** HAPI's terminology server has
+  no knowledge of our project-defined systems, so every `coding` that
+  points at them reports "unknown and can't be validated". The real
+  definitions ship in this repo under `public/fhir/CodeSystem/` (and
+  per-indicator `public/fhir/ValueSet/` files); anyone validating
+  locally can resolve them by loading those files into their own
+  terminology server.
+- **Missing narrative, dom-6 (15 warnings).** A standard FHIR
+  best-practice rule asking every resource for human-readable
+  `.text.div`. Our resources carry no narratives by design (machine
+  output, no rich-text surface); one notice per Bundle entry.
+- **Unknown extension (10 information notices).** HAPI noting our three
+  custom Provenance extensions. These arrive at `information` severity
+  — deliberately below D-07's error-only fallback trigger — so they
+  confirm the extensions were seen and tolerated, not rejected. The
+  real definitions ship under `public/fhir/StructureDefinition/`.
