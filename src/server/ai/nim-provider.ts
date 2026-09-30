@@ -72,7 +72,9 @@ export class NimProvider implements AssessmentProvider {
   readonly model: string;
 
   constructor(model?: string) {
-    this.model = model || process.env.AI_MODEL || NIM_NEMOTRON_MODEL;
+    // Operational default is the fast llama path (ADR-0008 update,
+    // 2026-09-30); pass the nemotron slug explicitly for tool calls.
+    this.model = model || process.env.AI_MODEL || NIM_LLAMA_MODEL;
   }
 
   private get useTools(): boolean {

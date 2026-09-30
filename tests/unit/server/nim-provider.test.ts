@@ -53,7 +53,7 @@ describe("nim provider (stubbed fetch, no live calls)", () => {
         }),
       };
     });
-    const provider = new NimProvider();
+    const provider = new NimProvider(NIM_NEMOTRON_MODEL);
     expect(provider.model).toBe(NIM_NEMOTRON_MODEL);
     const out = await provider.suggest(INPUT);
     expect(out.indicators).toHaveLength(1);
@@ -99,6 +99,10 @@ describe("nim provider (stubbed fetch, no live calls)", () => {
     expect(out.indicators).toMatchObject([{ indicator: "color", value: "brown" }]);
     expect(seen.tools).toBeUndefined();
     expect(seen.reasoning_budget).toBeUndefined();
+  });
+
+  it("defaults to the fast llama path", () => {
+    expect(new NimProvider().model).toBe(NIM_LLAMA_MODEL);
   });
 
   it("classifies failures for the retry policy", async () => {
