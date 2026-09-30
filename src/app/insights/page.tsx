@@ -97,7 +97,7 @@ function InsightsBody() {
           aria-label={`${COPY.demoBadge}: ${COPY.demoDataNotice}`}
           className="rounded-lg border-2 border-dashed border-primary p-4 text-center font-semibold"
         >
-          {COPY.demoBadge} — {COPY.demoDataNotice}
+          {COPY.demoDataNotice}
         </p>
       )}
 
