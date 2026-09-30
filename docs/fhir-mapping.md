@@ -1,0 +1,53 @@
+# StreamTrust FHIR mapping (R4)
+
+> Project-defined mapping per PROJECT.md Section 10 — **not** an official
+> OneAquaHealth profile (see ADR-0005). Canonical base is the
+> deployment-configured `FHIR_BASE_URL` (`http://localhost:3000/fhir` in
+> the committed generated files).
+
+## Bundle
+
+`type: transaction`. Every entry: `fullUrl: urn:uuid:<uuid>` +
+`request: { method: "POST", url: "<ResourceType>" }`. 15 entries per
+assessment: 1 Location, 1 Practitioner, 1 Device, 6 Observations, 6
+Provenances. Cross-references use the `urn:uuid` values.
+
+## Resources
+
+| Resource         | Key fields                                                                                                                                                                                                                                                                                                                                             |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Location         | `status: active`, `mode: instance`, `name` or `"Stream site"`, physicalType `si` (`location-physical-type` system), `position` = rounded lat/lng                                                                                                                                                                                                       |
+| Practitioner     | `active: true`, identifier `{system: <BASE>/volunteer-id, value: <volunteer uuid>}`, no name                                                                                                                                                                                                                                                           |
+| Device           | `status: active`, `deviceName[0] = {name: <model>, type: "model-name"}` (latest suggestion's model, env `AI_MODEL`, else `"manual"`), `type.text = "AI vision model"`, `version[0].value = <PROMPT_VERSION>`                                                                                                                                           |
+| Observation (×6) | `status: final`, category `survey`, `code` = indicator (`<BASE>/CodeSystem/stream-indicator`), `subject` → Location, `effectiveDateTime` = observed_at, `performer` → Practitioner, `valueCodeableConcept` = `<indicator>-<value>` (`<BASE>/CodeSystem/stream-indicator-value`, incl. `<indicator>-not_applicable`), `note[0].text` per template below |
+| Provenance (×6)  | `target` → Observation, `recorded` = submitted_at, `agent[0]` author → Practitioner, `agent[1]` informant → Device (only when that indicator has an AI suggestion), `activity` = CREATE (`v3-DataOperation`), extensions or fallback text                                                                                                              |
+| Media            | Out of scope (P2): photo bytes never enter the Bundle                                                                                                                                                                                                                                                                                                  |
+
+## Observation.note template
+
+`Decision: <source>. AI suggested: <value|none> (<band|n/a>). Evidence: <text|n/a>.`
+plus, when the assessment was submitted under a photo waiver,
+`Photo: none provided (waiver recorded).` appended to **all six** notes
+(ADR-0010 decision: each Observation stays standalone-consumable; no
+standard coded element fits at this granularity for MVP).
+
+## Provenance extensions
+
+| URL suffix                                | valueCode                             | Present when                              |
+| ----------------------------------------- | ------------------------------------- | ----------------------------------------- |
+| `/StructureDefinition/ai-suggested-value` | suggested code                        | an AI suggestion exists for the indicator |
+| `/StructureDefinition/ai-confidence-band` | low/medium/high/none                  | an AI suggestion exists                   |
+| `/StructureDefinition/decision-source`    | ai_accepted/human_override/human_only | always                                    |
+
+D-07 probe result (2026-09-30, live HAPI): unknown-extension findings
+at `information` severity only, zero errors — extensions ship as-is.
+Fallback (`useExtensions: false` → same facts in `Provenance.reason`
+text) is implemented and unit-tested should any validator report
+unknown-extension _errors_.
+
+## Validation
+
+`POST <FHIR_VALIDATION_BASE_URL>/Bundle/$validate`, parse
+`OperationOutcome`, count fatal/error vs warning. Gate: zero errors.
+Results stored in `fhir_exports`. Only demo/non-sensitive data is ever
+sent (rounded coords, no names); the UI says so before sending.
