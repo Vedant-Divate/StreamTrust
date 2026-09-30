@@ -96,6 +96,16 @@ export const COPY = {
     "a standards-format view arrives in a later step.",
   viewData: "Your data",
   downloadJson: "Download JSON",
+  getSuggestions: "Get AI suggestions",
+  suggestionsLoading: "Asking the AI…",
+  suggestionsFailed: "The AI is unavailable. Continue manually.",
+  useSuggestion: "Use suggestion",
+  whyLabel: "Why?",
+  aiCantTell: "AI can't tell from a photo",
+  bandLow: "Low confidence",
+  bandMedium: "Medium confidence",
+  bandHigh: "High confidence",
+  bandTooltip: "Self-reported by the AI. Not a measured accuracy.",
 } as const;
 
 export type CopyKey = keyof typeof COPY;

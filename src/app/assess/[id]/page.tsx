@@ -10,6 +10,7 @@ import {
   type IndicatorCode,
 } from "@/domain/vocab";
 import { IndicatorCard } from "@/components/wizard/IndicatorCard";
+import { AiSuggestionPanel, type SuggestionView } from "@/components/wizard/AiSuggestionPanel";
 import { PhotoUploader, type PhotoMeta } from "@/components/wizard/PhotoUploader";
 import { ProgressSteps, WizardNav } from "@/components/wizard/ProgressSteps";
 
@@ -22,6 +23,7 @@ interface View {
   assessment: { id: string; status: string };
   entries: Entry[];
   photos: PhotoMeta[];
+  suggestions: SuggestionView[];
 }
 
 export default function Wizard() {
@@ -29,6 +31,7 @@ export default function Wizard() {
   const [view, setView] = useState<View | null>(null);
   const [loadError, setLoadError] = useState("");
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [suggestState, setSuggestState] = useState<"idle" | "loading" | "error" | "done">("idle");
   // Autosaves can overlap when the user answers quickly. Only the latest
   // response may update the view; stale ones are dropped so the UI (and
   // the "saved" flag) never reflects an older server state.
@@ -108,10 +111,28 @@ export default function Wizard() {
     void saveEntries(entries);
   }
 
+  async function requestSuggestions() {
+    setSuggestState("loading");
+    try {
+      const res = await fetch(`/api/assessments/${id}/suggest`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      if (!res.ok) throw new Error("suggest failed");
+      await refresh();
+      setSuggestState("done");
+    } catch {
+      setSuggestState("error");
+    }
+  }
+
   if (loadError) return <p role="alert">{loadError}</p>;
   if (!view) return <p aria-live="polite">…</p>;
 
   const valueOf = (code: string) => view.entries.find((e) => e.indicator === code)?.finalValue;
+  const suggestionOf = (code: string) =>
+    [...view.suggestions].reverse().find((s) => s.indicator === code);
   const flowDry = valueOf("flow") === "dry";
 
   return (
@@ -140,13 +161,35 @@ export default function Wizard() {
                 : ""}
         </p>
         {flowDry && <p className="rounded-lg bg-muted p-3 text-sm">{COPY.dryNote}</p>}
+        {view.photos.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <button
+              type="button"
+              onClick={() => void requestSuggestions()}
+              disabled={suggestState === "loading"}
+              className="inline-flex min-h-[44px] items-center justify-center rounded-lg border px-4 text-base font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:opacity-50"
+            >
+              {suggestState === "loading" ? COPY.suggestionsLoading : COPY.getSuggestions}
+            </button>
+            <p aria-live="polite" className="min-h-[1.5rem] text-sm text-muted-foreground">
+              {suggestState === "error" ? COPY.suggestionsFailed : ""}
+            </p>
+          </div>
+        )}
         {INDICATORS.map((def) => (
-          <IndicatorCard
-            key={def.code}
-            def={def}
-            value={valueOf(def.code)}
-            onSelect={(v) => selectValue(def.code, v)}
-          />
+          <div key={def.code} className="flex flex-col gap-2">
+            <IndicatorCard
+              def={def}
+              value={valueOf(def.code)}
+              onSelect={(v) => selectValue(def.code, v)}
+            />
+            {suggestionOf(def.code) && (
+              <AiSuggestionPanel
+                suggestion={suggestionOf(def.code)}
+                onUse={(v) => selectValue(def.code, v)}
+              />
+            )}
+          </div>
         ))}
       </section>
 
