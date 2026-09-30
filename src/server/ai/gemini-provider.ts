@@ -24,7 +24,7 @@ export class GeminiProvider implements AssessmentProvider {
   readonly model: string;
 
   constructor(model?: string) {
-    this.model = model ?? process.env.AI_MODEL ?? GEMINI_DEFAULT_MODEL;
+    this.model = model || process.env.AI_MODEL || GEMINI_DEFAULT_MODEL;
   }
 
   async suggest(input: SuggestInput): Promise<RawSuggestResult> {

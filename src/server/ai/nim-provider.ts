@@ -72,7 +72,7 @@ export class NimProvider implements AssessmentProvider {
   readonly model: string;
 
   constructor(model?: string) {
-    this.model = model ?? process.env.AI_MODEL ?? NIM_NEMOTRON_MODEL;
+    this.model = model || process.env.AI_MODEL || NIM_NEMOTRON_MODEL;
   }
 
   private get useTools(): boolean {
