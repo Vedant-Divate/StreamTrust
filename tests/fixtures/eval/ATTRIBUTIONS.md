@@ -22,9 +22,22 @@ labels by design (smell cannot be judged from a photo).
 | dry-01.jpg    | https://commons.wikimedia.org/wiki/File:Dry_river_bed_in_California.jpg                                                                    | gin_e                   | CC BY-SA 2.0 |
 | dry-02.jpg    | https://commons.wikimedia.org/wiki/File:Dry_creek_bed_DMCR.jpg                                                                             | Prince Roy              | CC BY 2.0    |
 | dry-03.jpg    | https://commons.wikimedia.org/wiki/File:Maules-Creek-NSW-dry.jpg                                                                           | Felix Andrews           | CC BY-SA 3.0 |
+| clear-05.jpg  | https://commons.wikimedia.org/wiki/File:Rudranag_waterfall,_Himachal_Pradesh.jpg                                                           | YUVRAJ ANAND            | CC BY-SA 4.0 |
+| clear-06.jpg  | https://commons.wikimedia.org/wiki/File:Milky_stream.jpg                                                                                   | Aswin pookkoth          | CC BY-SA 4.0 |
+| turbid-05.jpg | https://commons.wikimedia.org/wiki/File:Beas_River_flowing_through_Manali.jpg                                                              | Shubhankar Sakalkale    | CC BY-SA 4.0 |
+| turbid-06.jpg | https://commons.wikimedia.org/wiki/File:Polluted_Canal_in_India.jpg                                                                        | McKay Savage            | CC BY 2.0    |
+| turbid-07.jpg | https://commons.wikimedia.org/wiki/File:Polluted_Malad_Creek_at_Lokhandwala,Mumbai_(4588707292).jpg                                        | Ravi Khemka             | CC BY 2.0    |
+| turbid-08.jpg | https://commons.wikimedia.org/wiki/File:Pollution_of_Ganga.jpg                                                                             | Lane                    | CC BY 2.0    |
+| turbid-09.jpg | https://commons.wikimedia.org/wiki/File:Narmada_river.jpg                                                                                  | Nireekshit              | CC BY-SA 3.0 |
 
 Images were downscaled/re-encoded to lightweight JPEGs (all ≤ ~730 KB,
 most far smaller) for a fast eval loop; visual content is unchanged.
 Two further candidates were examined and deliberately dropped: an
 aerial desert photo of the Muddy River (no assessable stream-level
 detail) and a lab flat-lay of microplastic fragments (no stream scene).
+Second batch, India-sourced: three more candidates were examined and
+dropped — a wide Himalayan valley landscape near Kalamati (no
+assessable water detail), a distant Spiti valley view of the Chandra
+river (water too distant to judge), and the "dry" Pampa Sarovar lake
+bed in Gujarat (visibly holding water, so a `dry` label would be
+false).
