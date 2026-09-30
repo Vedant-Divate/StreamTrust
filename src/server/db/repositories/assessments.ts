@@ -71,6 +71,11 @@ export async function createAssessment(db: DbClient, input: CreateAssessmentInpu
   return getAssessmentById(db, id);
 }
 
+export async function getSiteById(db: DbClient, id: string) {
+  const [row] = await db.select().from(sites).where(eq(sites.id, id));
+  return row;
+}
+
 export async function getAssessmentById(db: DbClient, id: string) {
   const [row] = await db.select().from(assessments).where(eq(assessments.id, id));
   return row;
