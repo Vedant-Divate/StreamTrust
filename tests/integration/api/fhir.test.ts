@@ -185,4 +185,18 @@ describe("POST /api/assessments/:id/fhir/validate", () => {
     );
     expect(res.status).toBe(502);
   });
+
+  it("rejects anonymous and foreign validation calls", async () => {
+    const { id } = await submittedFixture();
+    const validate = (cookie: string | null) =>
+      POST_VALIDATE(
+        new Request(`http://localhost/api/assessments/${id}/fhir/validate`, {
+          method: "POST",
+          headers: cookie ? { cookie: `st_vid=${cookie}` } : {},
+        }),
+        { params: Promise.resolve({ id }) }
+      );
+    expect((await validate(null)).status).toBe(403);
+    expect((await validate("00000000-0000-4000-8000-000000000000")).status).toBe(404);
+  });
 });

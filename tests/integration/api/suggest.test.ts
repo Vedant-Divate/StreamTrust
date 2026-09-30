@@ -182,6 +182,9 @@ describe("POST /api/assessments/:id/suggest (mock)", () => {
     const anon = await suggest(json.assessment.id, null);
     expect(anon.status).toBe(403);
 
+    const stranger = await suggest(json.assessment.id, "00000000-0000-4000-8000-000000000000");
+    expect(stranger.status).toBe(404);
+
     await setupDb
       .update(assessments)
       .set({ status: "submitted" })

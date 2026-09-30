@@ -308,6 +308,45 @@ describe("POST /api/assessments/:id/submit", () => {
     expect(again.status).toBe(409);
   });
 
+  it("rejects anonymous and foreign submit calls", async () => {
+    const { json } = await createDraft();
+    const id = json.assessment.id;
+    const submit = (cookie: string | null) =>
+      POST_SUBMIT(
+        new Request(`http://localhost/api/assessments/${id}/submit`, {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            ...(cookie ? { cookie: `st_vid=${cookie}` } : {}),
+          },
+          body: JSON.stringify({}),
+        }),
+        ctxFor(id)
+      );
+    expect((await submit(null)).status).toBe(403);
+    expect((await submit("00000000-0000-4000-8000-000000000000")).status).toBe(404);
+  });
+
+  it("rejects anonymous and foreign ack calls", async () => {
+    const { POST: POST_ACKS } = await import("@/app/api/assessments/[id]/acks/route");
+    const { json } = await createDraft();
+    const id = json.assessment.id;
+    const ack = (cookie: string | null) =>
+      POST_ACKS(
+        new Request(`http://localhost/api/assessments/${id}/acks`, {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            ...(cookie ? { cookie: `st_vid=${cookie}` } : {}),
+          },
+          body: JSON.stringify({ rule_id: "R-SMELL-CLEAN" }),
+        }),
+        { params: Promise.resolve({ id }) }
+      );
+    expect((await ack(null)).status).toBe(403);
+    expect((await ack("00000000-0000-4000-8000-000000000000")).status).toBe(404);
+  });
+
   it("blocks submit when an error rule fires, even bypassing the UI", async () => {
     const { json, cookie } = await createDraft();
     const id = json.assessment.id;
