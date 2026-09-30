@@ -82,3 +82,16 @@ All real output; IDs abbreviated here, full in the transcript above.
 - e2efb0e feat(api): enforce rule gating on submit
 - f541133 feat(review): add warning acknowledgement flow
 - b1c0d7c test(e2e): add smell-clean acknowledge and submit path
+
+## Addendum — photo_waived persisted post-gate (ADR-0010)
+
+After the gate above was written, the D-03 waiver gap was closed before
+Phase 6 began: `photo_waived` (boolean, default false) was added to
+`assessments` via forward-only migration `0001_lean_banshee.sql` (the
+Phase 1 migration is untouched), the submit route persists the payload
+value at finalize time, and `GET /api/assessments/:id` reflects it
+(the whole assessment row is returned, so no contract change).
+Verified by `pnpm verify` (115/115, incl. a waiver-true round-trip
+asserting `photoWaived === true` on the row afterwards and a
+photo-present submit asserting `false`) and applied to the Turso
+production database the same day.

@@ -13,4 +13,4 @@ Phase 0 resolutions were checked against the live Devpost pages on 2026-09-29.
 - A-8 (real observation data availability): UNRESOLVED — no public export found; using own photos + clearly labelled synthetic demo data (Phase 0 default).
 - D-01 (Vercel deploy): RESOLVED — live at https://streamtrust.vercel.app/ (Phase 0 exit criteria fully met).
 - D-02 (repo tests use `:memory:` libSQL, not temp files): the Windows file lock survives `client.close()`, so temp-file cleanup failed with EPERM; same driver + same real migration, so no behavior difference (Phase 1).
-- D-03 (photo waiver is not persisted): Section 7.3 requires a waiver but Section 7.2 has no column for it, so `photo_waiver` travels in validate/submit payloads only; `warning_acks` rows remain the only persisted acknowledgements (Phase 5).
+- D-03 (photo waiver persistence): RESOLVED by ADR-0010 — `photo_waived` column added and persisted at submit; payload waiver remains the submit-moment attestation for rule evaluation.
