@@ -99,8 +99,8 @@ export const COPY = {
   submitting: "Submitting…",
   doneTitle: "Assessment saved. Thank you!",
   doneText:
-    "Your answers are saved. Below is the raw data for this assessment; " +
-    "a standards-format view arrives in a later step.",
+    "Your answers are saved. Below is the raw data for this assessment, " +
+    "plus a standards-format health-data bundle you can check and download.",
   viewData: "Your data",
   downloadJson: "Download JSON",
   fhirBundleTitle: "FHIR health-data bundle",
