@@ -62,3 +62,19 @@ test/CI-only, unchanged.
 - `.env.example` (Section 17.1) updates: `AI_PROVIDER=nim` as the
   default, `NIM_API_KEY` added, `AI_MODEL` documented with both viable
   NIM model IDs, `ANTHROPIC_API_KEY` removed or marked unused.
+
+## Update — 2026-09-30: llama is the operational default
+
+Live Phase 4 evidence showed nemotron full-schema calls swinging 13–30 s
+on the free tier against the (now 40 s, see ADR-0009) timeout, while
+llama answered the same shape in ~6 s. Therefore:
+
+- `meta/llama-3.2-11b-vision-instruct` (prompt-JSON path) is the default
+  `AI_MODEL`: fast, reliable, verified live.
+- `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning` (function-calling path)
+  remains available via explicit `AI_MODEL` as the more capable but
+  slower and less predictable free-tier option.
+
+This changes only the operational default, not the architecture: both
+models and both extraction paths still exist and are both tested. No
+reversal of the above decision.
