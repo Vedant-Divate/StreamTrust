@@ -12,6 +12,7 @@
     "verify": "pnpm typecheck && pnpm lint && pnpm test && pnpm build",
     "db:generate": "drizzle-kit generate",
     "fhir:terminology": "pnpm dlx tsx scripts/generate-fhir-terminology.ts",
+    "seed:demo": "pnpm dlx tsx scripts/seed-demo.ts",
     "prepare": "husky"
   },
   "dependencies": {
