@@ -149,9 +149,14 @@ export class NimProvider implements AssessmentProvider {
 }
 
 function parsePayload(text: string): RawSuggestResult {
+  // Prompt-JSON models often wrap the payload in markdown fences.
+  const unfenced = text
+    .replace(/^[\s\S]*?```(?:json)?\s*/, "")
+    .replace(/\s*```[\s\S]*$/, "")
+    .trim();
   let parsed: unknown;
   try {
-    parsed = JSON.parse(text) as unknown;
+    parsed = JSON.parse(unfenced) as unknown;
   } catch {
     throw new ProviderError("NIM returned unparseable JSON.", true);
   }

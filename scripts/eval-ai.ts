@@ -17,7 +17,7 @@ import { PROMPT_VERSION } from "../src/server/ai/prompt";
 import { NimProvider } from "../src/server/ai/nim-provider";
 import { normalizeSuggestions } from "../src/server/ai/normalize";
 
-const FIXTURES = join(__dirname, "fixtures", "eval");
+const FIXTURES = join(__dirname, "..", "tests", "fixtures", "eval");
 const OUT = join(__dirname, "..", "docs", "verification", "eval-results.md");
 
 interface Label {
@@ -34,7 +34,7 @@ function loadLabels(): Label[] {
   }
   return lines.map((line) => {
     const [image, indicator, label] = line.split(",");
-    return { image, indicator, label };
+    return { image: image.trim(), indicator: indicator.trim(), label: label.trim() };
   });
 }
 

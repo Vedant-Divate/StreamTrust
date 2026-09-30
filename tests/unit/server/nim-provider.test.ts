@@ -118,6 +118,26 @@ describe("nim provider (stubbed fetch, no live calls)", () => {
     await expect(new NimProvider().suggest(INPUT)).rejects.toThrow("NIM_API_KEY is not set");
   });
 
+  it("strips markdown fences from prompt-JSON payloads", async () => {
+    process.env.NIM_API_KEY = "test-key";
+    stubFetch(() => ({
+      ok: true,
+      json: async () => ({
+        choices: [
+          {
+            message: {
+              content:
+                'Here is the assessment:\n```json\n{"image_quality": "ok", "indicators": []}\n```',
+            },
+          },
+        ],
+      }),
+    }));
+    const out = await new NimProvider(NIM_LLAMA_MODEL).suggest(INPUT);
+    expect(out.image_quality).toBe("ok");
+    expect(out.indicators).toEqual([]);
+  });
+
   it("treats unparseable payloads as retryable schema failures", async () => {
     process.env.NIM_API_KEY = "test-key";
     stubFetch(() => ({
