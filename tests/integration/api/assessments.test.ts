@@ -230,6 +230,25 @@ describe("PATCH /api/assessments/:id", () => {
     expect(view.entries.find((e) => e.indicator === "clarity")).toBeUndefined();
   });
 
+  it("rejects anonymous and foreign patch calls", async () => {
+    const { json } = await createDraft();
+    const id = json.assessment.id;
+    const patch = (cookie: string | null) =>
+      PATCH_ONE(
+        new Request(`http://localhost/api/assessments/${id}`, {
+          method: "PATCH",
+          headers: {
+            "content-type": "application/json",
+            ...(cookie ? { cookie: `st_vid=${cookie}` } : {}),
+          },
+          body: JSON.stringify({ notes: "hi" }),
+        }),
+        ctxFor(id)
+      );
+    expect((await patch(null)).status).toBe(403);
+    expect((await patch("00000000-0000-4000-8000-000000000000")).status).toBe(404);
+  });
+
   it("refuses edits once submitted (409)", async () => {
     const { json, cookie } = await createDraft();
     const id = json.assessment.id;
