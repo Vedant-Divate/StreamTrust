@@ -12,6 +12,7 @@ export interface SuggestInput {
   images: { mime: "image/jpeg"; base64: string }[];
   rainLast24h: RainLast24h;
   promptVersion: string;
+  signal?: AbortSignal;
 }
 
 export interface RawIndicatorSuggestion {
