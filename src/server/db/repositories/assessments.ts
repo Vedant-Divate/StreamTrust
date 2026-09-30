@@ -13,6 +13,7 @@ import {
   photos,
   sites,
   volunteers,
+  warningAcks,
 } from "@/server/db/schema";
 
 function now(): string {
@@ -153,6 +154,27 @@ export async function getIndicatorEntries(db: DbClient, assessmentId: string) {
         eq(indicatorEntries.indicator, indicator)
       )
     );
+}
+
+/** Record an explicit warning acknowledgement. */
+export async function addWarningAck(
+  db: DbClient,
+  input: { assessmentId: string; ruleId: string; note?: string }
+) {
+  const id = randomUUID();
+  await db.insert(warningAcks).values({
+    id,
+    assessmentId: input.assessmentId,
+    ruleId: input.ruleId,
+    note: input.note ?? null,
+    createdAt: new Date().toISOString(),
+  });
+  const [row] = await db.select().from(warningAcks).where(eq(warningAcks.id, id));
+  return row;
+}
+
+export async function getWarningAcks(db: DbClient, assessmentId: string) {
+  return db.select().from(warningAcks).where(eq(warningAcks.assessmentId, assessmentId));
 }
 
 /** Record the submit-time provenance outcome for one entry. */

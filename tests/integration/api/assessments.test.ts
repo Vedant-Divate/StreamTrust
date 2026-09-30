@@ -283,7 +283,8 @@ describe("POST /api/assessments/:id/submit", () => {
     const res = await POST_SUBMIT(
       new Request(`http://localhost/api/assessments/${id}/submit`, {
         method: "POST",
-        headers: { cookie: `st_vid=${cookie}` },
+        headers: { "content-type": "application/json", cookie: `st_vid=${cookie}` },
+        body: JSON.stringify({ photo_waiver: true }),
       }),
       ctxFor(id)
     );
@@ -299,6 +300,98 @@ describe("POST /api/assessments/:id/submit", () => {
       ctxFor(id)
     );
     expect(again.status).toBe(409);
+  });
+
+  it("blocks submit when an error rule fires, even bypassing the UI", async () => {
+    const { json, cookie } = await createDraft();
+    const id = json.assessment.id;
+    const headers = { "content-type": "application/json", cookie: `st_vid=${cookie}` };
+    // Direct API PATCH: dry bed with real appearance values (the wizard
+    // would never produce this state).
+    await PATCH_ONE(
+      new Request(`http://localhost/api/assessments/${id}`, {
+        method: "PATCH",
+        headers,
+        body: JSON.stringify({
+          entries: [
+            { indicator: "flow", final_value: "dry" },
+            { indicator: "clarity", final_value: "clear" },
+            { indicator: "color", final_value: "brown" },
+            { indicator: "algae", final_value: "none" },
+            { indicator: "litter", final_value: "none" },
+            { indicator: "odor", final_value: "none" },
+          ],
+        }),
+      }),
+      ctxFor(id)
+    );
+    const res = await POST_SUBMIT(
+      new Request(`http://localhost/api/assessments/${id}/submit`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ photo_waiver: true }),
+      }),
+      ctxFor(id)
+    );
+    expect(res.status).toBe(422);
+    const body = (await res.json()) as { error: { code: string } };
+    expect(body.error.code).toBe("validation_failed");
+  });
+
+  it("blocks submit on unacknowledged warnings, then succeeds after acking", async () => {
+    const { json, cookie } = await createDraft();
+    const id = json.assessment.id;
+    const headers = { "content-type": "application/json", cookie: `st_vid=${cookie}` };
+    await PATCH_ONE(
+      new Request(`http://localhost/api/assessments/${id}`, {
+        method: "PATCH",
+        headers,
+        body: JSON.stringify({
+          entries: [
+            { indicator: "clarity", final_value: "clear" },
+            { indicator: "color", final_value: "colorless" },
+            { indicator: "algae", final_value: "none" },
+            { indicator: "litter", final_value: "none" },
+            { indicator: "flow", final_value: "slow" },
+            { indicator: "odor", final_value: "sewage_like" },
+          ],
+        }),
+      }),
+      ctxFor(id)
+    );
+    const submit = (waiver: boolean) =>
+      POST_SUBMIT(
+        new Request(`http://localhost/api/assessments/${id}/submit`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ photo_waiver: waiver }),
+        }),
+        ctxFor(id)
+      );
+
+    const blocked = await submit(true);
+    expect(blocked.status).toBe(422);
+    const blockedBody = (await blocked.json()) as {
+      error: { code: string; details: { missing: string[] } };
+    };
+    expect(blockedBody.error.code).toBe("unacknowledged_warnings");
+    expect(blockedBody.error.details.missing).toEqual(["R-SMELL-CLEAN"]);
+
+    const { POST: POST_ACKS } = await import("@/app/api/assessments/[id]/acks/route");
+    const acked = await POST_ACKS(
+      new Request(`http://localhost/api/assessments/${id}/acks`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ rule_id: "R-SMELL-CLEAN" }),
+      }),
+      { params: Promise.resolve({ id }) }
+    );
+    expect(acked.status).toBe(201);
+
+    const done = await submit(true);
+    expect(done.status).toBe(200);
+    const doneBody = (await done.json()) as { assessment: { status: string } };
+    expect(doneBody.assessment.status).toBe("submitted");
   });
 });
 
