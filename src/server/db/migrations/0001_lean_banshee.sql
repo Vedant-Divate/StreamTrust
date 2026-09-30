@@ -1,0 +1,1 @@
+ALTER TABLE `assessments` ADD `photo_waived` integer DEFAULT false NOT NULL;

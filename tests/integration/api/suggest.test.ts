@@ -12,6 +12,7 @@ import { migrate } from "drizzle-orm/libsql/migrator";
 import { assessments } from "@/server/db/schema";
 import * as schema from "@/server/db/schema";
 import { getSuggestionsByAssessment } from "@/server/db/repositories/suggestions";
+import { getAssessmentById } from "@/server/db/repositories/assessments";
 import type { TestDb } from "../db/helpers";
 
 const dbFile = join(tmpdir(), `st-suggest-test-${process.pid}-${Date.now()}.db`).replace(
@@ -238,5 +239,7 @@ describe("POST /api/assessments/:id/suggest (mock)", () => {
     // Linked rows point at real suggestion rows.
     expect(suggestionIds.has(byIndicator.clarity.aiSuggestionId!)).toBe(true);
     expect(byIndicator.odor.aiSuggestionId).toBeNull();
+    // Photo present, no waiver sent: persisted as not waived.
+    expect((await getAssessmentById(setupDb, id))?.photoWaived).toBe(false);
   });
 });

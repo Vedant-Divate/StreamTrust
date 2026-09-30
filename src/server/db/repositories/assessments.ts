@@ -234,15 +234,20 @@ export async function getAssessmentView(db: DbClient, assessmentId: string) {
 /**
  * Finalize a draft. Only flips a `draft` row to `submitted` (returns
  * false otherwise); completeness and rule gating live in the routes
- * and Phase 5, not here.
+ * and Phase 5, not here. Persists the photo waiver attestation so a
+ * submitted zero-photo record keeps its reason durably.
  */
-export async function submitAssessment(db: DbClient, assessmentId: string) {
+export async function submitAssessment(
+  db: DbClient,
+  assessmentId: string,
+  opts: { photoWaived: boolean } = { photoWaived: false }
+) {
   const assessment = await getAssessmentById(db, assessmentId);
   if (!assessment || assessment.status !== "draft") return undefined;
   const submittedAt = new Date().toISOString();
   await db
     .update(assessments)
-    .set({ status: "submitted", submittedAt })
+    .set({ status: "submitted", submittedAt, photoWaived: opts.photoWaived })
     .where(eq(assessments.id, assessmentId));
   return getAssessmentById(db, assessmentId);
 }

@@ -11,6 +11,9 @@ import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/libsql";
 import { migrate } from "drizzle-orm/libsql/migrator";
 import { assessments } from "@/server/db/schema";
+import * as schema from "@/server/db/schema";
+import { getAssessmentById } from "@/server/db/repositories/assessments";
+import type { TestDb } from "../db/helpers";
 
 const dbFile = join(tmpdir(), `st-api-test-${process.pid}-${Date.now()}.db`).replace(/\\/g, "/");
 
@@ -19,7 +22,7 @@ let GET_ONE: (req: Request, ctx: { params: Promise<{ id: string }> }) => Promise
 let PATCH_ONE: (req: Request, ctx: { params: Promise<{ id: string }> }) => Promise<Response>;
 let POST_SUBMIT: (req: Request, ctx: { params: Promise<{ id: string }> }) => Promise<Response>;
 let GET_HEALTH: () => Promise<Response>;
-let setupDb: ReturnType<typeof drizzle>;
+let setupDb: TestDb;
 let setupClient: Client;
 
 function ctxFor(id: string) {
@@ -61,7 +64,7 @@ async function createDraft(cookie?: string) {
 beforeAll(async () => {
   process.env.DATABASE_URL = `file:${dbFile}`;
   setupClient = createClient({ url: `file:${dbFile}` });
-  setupDb = drizzle(setupClient);
+  setupDb = drizzle(setupClient, { schema });
   await migrate(setupDb, { migrationsFolder: "./src/server/db/migrations" });
 
   ({ POST } = await import("@/app/api/assessments/route"));
@@ -291,6 +294,9 @@ describe("POST /api/assessments/:id/submit", () => {
     expect(res.status).toBe(200);
     const body = (await res.json()) as { assessment: { status: string } };
     expect(body.assessment.status).toBe("submitted");
+    // Waiver attested with no photos: persisted durably on the row.
+    const row = await getAssessmentById(setupDb, id);
+    expect(row?.photoWaived).toBe(true);
 
     const again = await POST_SUBMIT(
       new Request(`http://localhost/api/assessments/${id}/submit`, {

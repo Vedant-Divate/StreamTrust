@@ -34,6 +34,7 @@ export const assessments = sqliteTable("assessments", {
   consentAt: text("consent_at"),
   createdAt: text("created_at").notNull(),
   submittedAt: text("submitted_at"),
+  photoWaived: integer("photo_waived", { mode: "boolean" }).notNull().default(false),
 });
 
 export const photos = sqliteTable("photos", {

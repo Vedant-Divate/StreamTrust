@@ -87,6 +87,6 @@ export async function POST(req: Request, ctx: Ctx) {
     }
     await setEntryDecisionSource(db, id, entry.indicator, source, suggestionId);
   }
-  const assessment = await submitAssessment(db, id);
+  const assessment = await submitAssessment(db, id, { photoWaived: photoWaiver });
   return NextResponse.json({ assessment });
 }
