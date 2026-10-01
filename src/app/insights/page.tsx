@@ -1,8 +1,9 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { TriangleAlert } from "lucide-react";
+import { Droplets, TriangleAlert } from "lucide-react";
 import { COPY } from "@/domain/copy";
 import { INDICATORS } from "@/domain/vocab";
 import { AgreementChart } from "@/components/insights/AgreementChart";
@@ -120,7 +121,18 @@ function InsightsBody() {
         {!summary ? (
           <p>…</p>
         ) : summary.pairs === 0 ? (
-          <p>{COPY.noInsightsData}</p>
+          <div className="flex flex-col gap-3 rounded-lg border border-info/30 border-l-4 border-l-info bg-info-wash p-4">
+            <p className="flex items-start gap-2 text-sm leading-relaxed">
+              <Droplets aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-info" />
+              <span>{COPY.noInsightsData}</span>
+            </p>
+            <Link
+              href="/assess/new"
+              className="inline-flex min-h-[44px] items-center self-start rounded px-2 underline decoration-primary decoration-2 underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            >
+              {COPY.startAssessment}
+            </Link>
+          </div>
         ) : (
           <>
             <section aria-label="Summary" className="grid grid-cols-3 gap-3">
