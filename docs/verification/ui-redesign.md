@@ -138,3 +138,47 @@ new to govern; all SVGs are decorative (`aria-hidden`).
 - `38a24aa` style(wizard): survey-form options, field-note AI panels, ford stepper
 - `55ac748` style(review): bank severity system; done and insights display pass
 - this commit: docs(verification) + screenshots + D-06 question log
+
+## Addendum — follow-up: carry the identity through (4 surgical items)
+
+The landing had an identity; the inner screens didn't fully share it.
+Fixed without touching landing, done/FHIR viewer, or the AI panel
+treatment:
+
+1. **Wave motif in the stepper** (`ProgressSteps`): the plain segmented
+   bar is now four mini ripple glyphs (same `q`/`t` wave language as the
+   landing divider, scaled to 8px) — teal up to the current step, stone
+   after. Decorative (`aria-hidden`); the label carries meaning.
+   Commit: `style(wizard): ripple ford-markers in step-progress indicator`.
+2. **Serif numerals on steps + review rows**: "Step _2_ of 4" renders
+   the numeral in teal display serif (AT gets the exact COPY string via
+   `aria-label`); review answer rows gained matching numerals 1–6 in
+   the indicators' fixed order. Step 1's page-side label got the same
+   treatment in a consistency commit (visual text identical, `aria-label`
+   carries the COPY string verbatim — no copy change). Commits:
+   `style(wizard): serif numerals on step label and review rows`,
+   `style(assess): serif numeral on step-1 label for consistency`.
+3. **`/assess/new` connective tissue**: hairline rules between the
+   Location / Date-time / Rain / Notes groups (landing's ruled-entry
+   language) plus a mini wave tick in the Location legend. Inputs,
+   order, and behavior untouched. Commit: `style(assess): ruled groups
+and wave tick on new-assessment form`.
+4. **Insights empty state**: confirmed REAL, not a timing artifact —
+   on a fresh DB the follow-up spec asserted `Not enough data yet.`
+   renders (the earlier `…` screenshots were taken before fetch
+   resolved). The bare paragraph is now a proper card (info wash +
+   bank, Droplets icon, existing `noInsightsData` copy, existing
+   `startAssessment` link — zero new strings). Commit: `style(insights):
+real empty-state card with start action`.
+
+Screenshots (`screenshots-redesign/followup/`): `new.png` (rules, tick,
+step-1 numeral), `wizard.png` (filled/unfilled ford waves), `review.png`
+(answer numerals), `insights-empty.png` (the real empty state on a
+fresh DB).
+
+Verification: `pnpm verify` green before every commit (147/147);
+axe 4/4 green; full Playwright suite 8/8 green serially. Flake note: one
+axe timeout (orphaned browsers) and one ai-suggest submit stall (cold
+dev server) both passed on isolated re-run and a clean full re-run —
+environmental, same parallel-load lesson as the main pass. Landing,
+done/FHIR, AI panel, disclaimers, and all copy byte-identical.
