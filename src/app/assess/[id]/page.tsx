@@ -206,7 +206,12 @@ export default function Wizard() {
               value={valueOf(def.code)}
               onSelect={(v) => selectValue(def.code, v)}
             />
-            {suggestionOf(def.code) && (
+            {/* Once a suggestion round exists, every indicator gets its
+                panel slot: a row the model skipped renders the abstention
+                note ("AI can't tell…") instead of silent nothing, so a
+                missing suggestion is never mistaken for a missing feature.
+                AiSuggestionPanel already maps undefined to the note. */}
+            {view.suggestions.length > 0 && (
               <AiSuggestionPanel
                 suggestion={suggestionOf(def.code)}
                 onUse={(v) => selectValue(def.code, v)}
