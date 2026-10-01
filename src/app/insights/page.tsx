@@ -112,7 +112,10 @@ function InsightsBody() {
           onChange={(e) => toggleDemo(e.target.checked)}
           className="h-6 w-6 shrink-0 accent-primary"
         />
-        <label htmlFor="include-demo" className="min-h-[44px] inline-flex items-center text-sm">
+        <label
+          htmlFor="include-demo"
+          className="min-h-[44px] inline-flex cursor-pointer items-center text-sm"
+        >
           {COPY.includeDemo}
         </label>
       </div>

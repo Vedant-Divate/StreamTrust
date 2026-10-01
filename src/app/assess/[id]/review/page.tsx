@@ -180,7 +180,7 @@ export default function Review() {
               onChange={(e) => setWaiver(e.target.checked)}
               className="mt-1 h-6 w-6 shrink-0 accent-primary"
             />
-            <label htmlFor="waiver" className="text-sm">
+            <label htmlFor="waiver" className="cursor-pointer text-sm">
               {COPY.waiverLabel}
             </label>
           </div>

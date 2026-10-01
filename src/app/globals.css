@@ -155,4 +155,14 @@
   ::selection {
     background: var(--accent);
   }
+  /* Tailwind v4 no longer gives buttons a pointer cursor by default;
+     restore it so clickable controls read as clickable. Checkbox labels
+     get it per-element where they toggle an input. */
+  button:not(:disabled),
+  summary {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
 }

@@ -226,7 +226,7 @@ export default function NewAssessment() {
             required
             className="mt-1 h-6 w-6 shrink-0 accent-primary"
           />
-          <label htmlFor="consent" className="text-sm">
+          <label htmlFor="consent" className="cursor-pointer text-sm">
             {COPY.consentCheckbox}
           </label>
         </div>
