@@ -148,3 +148,61 @@ rejected for now (systematic truncation at production token budgets;
 revisit only with a raised `max_tokens` and a re-test), and
 `google/gemma-4-31b-it` is rejected outright (never answers within any
 usable timeout on this tier).
+
+## Follow-up — 2026-10-01: truncation headroom, dry-bed reruns, variance
+
+Same 5 photos, same prompt shape and sampling params as
+`nim-provider.ts` (temp 0.3, top_p 0.9; Task 1 only raises
+`max_tokens` 800 → 2500), direct NIM calls this time rather than the
+HTTP route — no code, defaults, ADR, or env files touched. Timings are
+therefore model times, not route times.
+
+### Task 1 — muse-glimmer at max_tokens 2500: truncation resolved
+
+5/5 parse (was 0/5 at 800). Latencies: 13.8 s, 18.5 s, 20.2 s,
+**41.8 s**, 24.9 s — the fix works but one run still exceeds even the
+40 s route ceiling. Quality against team labels is genuinely strong:
+clear-01 4/5 (only color green-vs-brown wrong), turbid-01 4/5 decided
+with an honest algae abstention, litter-02 4/4, and dry-02 got
+`flow: dry` with everything else abstained — the only model so far to
+suggest `dry` at all. Verdict: **capable but operationally awkward** —
+it needs 3× the token budget and still flirts with timeouts. The
+earlier rejection stands, upgraded from "failure" to "possible with a
+higher ceiling the current route does not offer".
+
+### Task 2 — diffusiongemma dry-bed: intermittent, not transient
+
+Three more dry runs: `flow: dry` alone on dry-02 (1.4 s), empty indicators array
+on dry-02 (1.7 s), empty indicators array on dry-01 from the fixture set
+(5.0 s). So the earlier route 502 was
+the model returning _valid JSON with zero rows_ — fast every time, but
+empty. Pattern, not outage: on dry scenes diffusiongemma either emits
+a lone `dry` row or nothing usable, never a full assessment. That is a
+real abstention-handling gap under Product principle 2 (it neither
+reliably suggests `dry` nor abstains informatively per indicator) —
+worth knowing, not a disqualifier given every other scene works.
+
+### Task 3 — diffusiongemma variance over 3 runs per photo
+
+| photo     | run 1 (route)      | run 2                 | run 3              | min / avg / max        |
+| --------- | ------------------ | --------------------- | ------------------ | ---------------------- |
+| clear-01  | 3,951 ms ✓         | 2,557 ms ✓            | 2,246 ms ✓         | 2,246 / 2,918 / 3,951  |
+| turbid-01 | 3,845 ms ✓         | 1,737 ms ✓            | 1,737 ms ✓         | 1,737 / 2,440 / 3,845  |
+| algae-02  | 2,460 ms ✓         | 1,946 ms ✓            | 1,844 ms ✓         | 1,844 / 2,083 / 2,460  |
+| dry-02    | 2,811 ms ✗ (empty) | 1,455 ms ✓ (lone dry) | 1,431 ms ✗ (empty) | sole success: 1,455    |
+| litter-02 | 2,265 ms ✓         | 2,024 ms ✓            | 1,941 ms ✗         | successes: 2,024–2,265 |
+
+12 of 15 runs returned usable suggestions (the two empty dry arrays and
+the one unparseable litter run did not); all successes land in
+1.4–4.0 s with no timeout risk. Variance is tight everywhere except
+dry scenes (see Task 2).
+
+### Revised recommendation
+
+Unchanged in structure, sharper in evidence: diffusiongemma stays the
+candidate (fast, structured, good eyeball agreement, correct
+abstentions where it decides) with two known reservations — dry scenes
+and single-run-per-photo coverage everywhere else. muse-glimmer moves
+from "rejected" to "backup if token budgets ever rise". gemma stays
+rejected. llama stays the default until a full 22-image eval says
+otherwise.
