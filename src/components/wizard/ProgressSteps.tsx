@@ -6,7 +6,11 @@ export function ProgressSteps({ step, of }: { step: number; of: number }) {
   return (
     <div className="flex flex-col gap-1.5">
       <p aria-label={`Step ${step} of ${of}`} className="text-sm text-muted-foreground">
-        Step {step} of {of}
+        Step{" "}
+        <span aria-hidden="true" className="font-display text-base font-bold text-primary">
+          {step}
+        </span>{" "}
+        of {of}
       </p>
       {/* Ford markers: the landing divider's ripple, scaled down to a small
           repeated glyph — filled up to the current step. Decorative; the

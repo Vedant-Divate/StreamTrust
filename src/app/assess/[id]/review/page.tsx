@@ -189,16 +189,22 @@ export default function Review() {
 
       <section aria-label="Answers" className="flex flex-col gap-2">
         <dl className="flex flex-col gap-2">
-          {INDICATORS.map((d) => {
+          {INDICATORS.map((d, i) => {
             const entry = valueOf(d.code);
             const label = entry ? (d.values.find((v) => v.code === entry)?.label ?? entry) : "—";
             return (
               <div
                 key={d.code}
-                className="flex items-baseline justify-between gap-3 rounded-lg border border-border bg-card p-3"
+                className="flex items-baseline gap-3 rounded-lg border border-border bg-card p-3"
               >
+                <span
+                  aria-hidden="true"
+                  className="font-display text-lg font-bold tabular-nums text-primary/60"
+                >
+                  {i + 1}
+                </span>
                 <dt className="text-sm text-muted-foreground">{d.label}</dt>
-                <dd className="text-right font-medium">{label}</dd>
+                <dd className="ml-auto text-right font-medium">{label}</dd>
               </div>
             );
           })}
