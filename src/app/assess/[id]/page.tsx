@@ -70,7 +70,10 @@ export default function Wizard() {
     };
   }, [id]);
 
-  async function saveEntries(entries: { indicator: string; final_value: string | null }[]) {
+  async function saveEntries(
+    entries: { indicator: string; final_value: string | null }[],
+    rollback = false
+  ) {
     const seq = ++saveSeq.current;
     setSaveState("saving");
     try {
@@ -86,7 +89,12 @@ export default function Wizard() {
         setSaveState("saved");
       }
     } catch {
-      if (seq === saveSeq.current) setSaveState("error");
+      if (seq === saveSeq.current) {
+        setSaveState("error");
+        // Roll back the optimistic update so the UI never shows a value
+        // the server rejected. A newer in-flight save reconciles itself.
+        if (rollback) void refresh();
+      }
     }
   }
 
@@ -108,7 +116,22 @@ export default function Wizard() {
         }
       }
     }
-    void saveEntries(entries);
+    // Optimistic: reflect the choice instantly instead of waiting for the
+    // PATCH round-trip (which is what made selections feel laggy). The
+    // response reconciles afterwards; a failure rolls back (see above).
+    setView((prev) => {
+      if (!prev) return prev;
+      const next = new Map(prev.entries.map((e) => [e.indicator, e.finalValue]));
+      for (const e of entries) {
+        if (e.final_value === null) next.delete(e.indicator);
+        else next.set(e.indicator, e.final_value);
+      }
+      return {
+        ...prev,
+        entries: [...next].map(([ind, val]) => ({ indicator: ind, finalValue: val })),
+      };
+    });
+    void saveEntries(entries, true);
   }
 
   async function requestSuggestions() {
