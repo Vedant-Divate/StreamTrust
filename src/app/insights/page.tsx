@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { TriangleAlert } from "lucide-react";
 import { COPY } from "@/domain/copy";
 import { INDICATORS } from "@/domain/vocab";
 import { AgreementChart } from "@/components/insights/AgreementChart";
@@ -87,7 +88,7 @@ function InsightsBody() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">{COPY.insightsTitle}</h1>
+        <h1 className="font-display text-2xl font-bold tracking-tight">{COPY.insightsTitle}</h1>
         <p className="text-muted-foreground">{COPY.insightsIntro}</p>
       </div>
 
@@ -95,8 +96,9 @@ function InsightsBody() {
         <p
           role="note"
           aria-label={`${COPY.demoBadge}: ${COPY.demoDataNotice}`}
-          className="rounded-lg border-2 border-dashed border-primary p-4 text-center font-semibold"
+          className="flex items-center gap-2 rounded-lg border border-warning/40 border-l-4 border-l-warning bg-warning-wash p-4 text-center font-semibold"
         >
+          <TriangleAlert aria-hidden="true" className="h-5 w-5 shrink-0 text-warning" />
           {COPY.demoDataNotice}
         </p>
       )}
@@ -122,24 +124,24 @@ function InsightsBody() {
         ) : (
           <>
             <section aria-label="Summary" className="grid grid-cols-3 gap-3">
-              <div className="rounded-lg border p-4 text-center">
-                <p className="text-3xl font-semibold">
+              <div className="rounded-lg border border-border bg-card p-4 text-center">
+                <p className="font-display text-3xl font-bold tabular-nums">
                   {summary.rate === null ? "—" : `${summary.rate}%`}
                 </p>
                 <p className="text-sm text-muted-foreground">{COPY.agreementRate}</p>
               </div>
-              <div className="rounded-lg border p-4 text-center">
-                <p className="text-3xl font-semibold">{summary.pairs}</p>
+              <div className="rounded-lg border border-border bg-card p-4 text-center">
+                <p className="font-display text-3xl font-bold tabular-nums">{summary.pairs}</p>
                 <p className="text-sm text-muted-foreground">{COPY.comparedAnswers}</p>
               </div>
-              <div className="rounded-lg border p-4 text-center">
-                <p className="text-3xl font-semibold">{summary.overrides}</p>
+              <div className="rounded-lg border border-border bg-card p-4 text-center">
+                <p className="font-display text-3xl font-bold tabular-nums">{summary.overrides}</p>
                 <p className="text-sm text-muted-foreground">{COPY.changedAnswers}</p>
               </div>
             </section>
 
             <section aria-labelledby="by-q" className="flex flex-col gap-3">
-              <h2 id="by-q" className="text-xl font-semibold">
+              <h2 id="by-q" className="font-display text-xl font-bold">
                 {COPY.byIndicatorTitle}
               </h2>
               <AgreementChart
@@ -153,7 +155,7 @@ function InsightsBody() {
             </section>
 
             <section aria-labelledby="by-band" className="flex flex-col gap-3">
-              <h2 id="by-band" className="text-xl font-semibold">
+              <h2 id="by-band" className="font-display text-xl font-bold">
                 {COPY.bandTitle}
               </h2>
               <AgreementChart
@@ -167,7 +169,7 @@ function InsightsBody() {
             </section>
 
             <section aria-labelledby="overrides" className="flex flex-col gap-3">
-              <h2 id="overrides" className="text-xl font-semibold">
+              <h2 id="overrides" className="font-display text-xl font-bold">
                 {COPY.overridesTitle}
               </h2>
               <OverrideTable

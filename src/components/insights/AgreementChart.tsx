@@ -15,7 +15,7 @@ export function AgreementChart({ items }: { items: BarItem[] }) {
         <li key={item.key} className="flex flex-col gap-1">
           <div className="flex items-baseline justify-between gap-3 text-sm">
             <span className="font-medium">{item.label}</span>
-            <span className="text-muted-foreground">{item.detail}</span>
+            <span className="text-muted-foreground tabular-nums">{item.detail}</span>
           </div>
           <div
             className="h-3 overflow-hidden rounded-full bg-muted"

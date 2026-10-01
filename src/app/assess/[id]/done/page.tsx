@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import { CircleAlert, Info, OctagonX } from "lucide-react";
 import { COPY } from "@/domain/copy";
 
 interface ValidationResult {
@@ -99,11 +100,11 @@ export default function Done() {
 
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="text-2xl font-semibold tracking-tight">{COPY.doneTitle}</h1>
-      <p>{COPY.doneText}</p>
+      <h1 className="font-display text-2xl font-bold tracking-tight">{COPY.doneTitle}</h1>
+      <p className="leading-relaxed">{COPY.doneText}</p>
 
       <section aria-labelledby="data-h" className="flex flex-col gap-3">
-        <h2 id="data-h" className="text-xl font-semibold">
+        <h2 id="data-h" className="font-display text-xl font-bold">
           {COPY.viewData}
         </h2>
         <details className="rounded-lg border p-4">
@@ -126,7 +127,7 @@ export default function Done() {
       </section>
 
       <section aria-labelledby="fhir-h" className="flex flex-col gap-3">
-        <h2 id="fhir-h" className="text-xl font-semibold">
+        <h2 id="fhir-h" className="font-display text-xl font-bold">
           {COPY.fhirBundleTitle}
         </h2>
         {bundle ? (
@@ -161,7 +162,9 @@ export default function Done() {
             {validating ? COPY.fhirValidating : COPY.fhirValidateButton}
           </button>
         </div>
-        <p className="rounded-lg bg-muted p-3 text-sm">{COPY.fhirNotice}</p>
+        <p className="rounded-lg border border-info/30 border-l-4 border-l-info bg-info-wash p-3 text-sm leading-relaxed">
+          {COPY.fhirNotice}
+        </p>
         <div aria-live="polite">
           {validationError && (
             <p role="alert" className="text-sm text-destructive">
@@ -169,19 +172,48 @@ export default function Done() {
             </p>
           )}
           {validation && (
-            <div className="flex flex-col gap-2 rounded-lg border p-4">
-              <p className="font-medium">
-                {validation.errorCount} {COPY.fhirErrors} · {validation.warningCount}{" "}
-                {COPY.fhirWarnings}
-              </p>
+            <div className="flex flex-col gap-2 rounded-lg border border-border bg-card p-4">
+              <dl className="flex flex-col gap-1">
+                <div className="flex items-baseline justify-between gap-3 text-sm">
+                  <dt className="flex items-center gap-2 text-muted-foreground">
+                    <OctagonX aria-hidden="true" className="h-4 w-4 text-destructive" />
+                    {COPY.fhirErrors}
+                  </dt>
+                  <dd className="text-base font-semibold tabular-nums">{validation.errorCount}</dd>
+                </div>
+                <div className="flex items-baseline justify-between gap-3 text-sm">
+                  <dt className="flex items-center gap-2 text-muted-foreground">
+                    <CircleAlert aria-hidden="true" className="h-4 w-4 text-warning" />
+                    {COPY.fhirWarnings}
+                  </dt>
+                  <dd className="text-base font-semibold tabular-nums">
+                    {validation.warningCount}
+                  </dd>
+                </div>
+              </dl>
               {validation.issues.length === 0 ? (
                 <p className="text-sm">{COPY.fhirNoIssues}</p>
               ) : (
-                <ul className="flex max-h-64 flex-col gap-1 overflow-auto text-sm">
+                <ul className="flex max-h-64 flex-col gap-2 overflow-auto text-sm">
                   {validation.issues.map((issue, i) => (
-                    <li key={i}>
-                      [{issue.severity}]{issue.code ? ` ${issue.code}` : ""}
-                      {issue.diagnostics ? `: ${issue.diagnostics.slice(0, 200)}` : ""}
+                    <li key={i} className="flex items-start gap-2">
+                      {issue.severity === "error" ? (
+                        <OctagonX
+                          aria-hidden="true"
+                          className="mt-0.5 h-4 w-4 shrink-0 text-destructive"
+                        />
+                      ) : issue.severity === "warning" ? (
+                        <CircleAlert
+                          aria-hidden="true"
+                          className="mt-0.5 h-4 w-4 shrink-0 text-warning"
+                        />
+                      ) : (
+                        <Info aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-info" />
+                      )}
+                      <span>
+                        {issue.code ? `${issue.code}: ` : ""}
+                        {issue.diagnostics ? issue.diagnostics.slice(0, 200) : issue.severity}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -194,13 +226,13 @@ export default function Done() {
       <nav aria-label="Next steps" className="flex gap-4">
         <Link
           href="/assess/new"
-          className="inline-flex min-h-[44px] items-center rounded px-2 underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          className="inline-flex min-h-[44px] items-center rounded px-2 underline decoration-primary decoration-2 underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
         >
           {COPY.startAssessment}
         </Link>
         <Link
           href="/"
-          className="inline-flex min-h-[44px] items-center rounded px-2 underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          className="inline-flex min-h-[44px] items-center rounded px-2 underline decoration-primary decoration-2 underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
         >
           {COPY.appName}
         </Link>
