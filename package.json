@@ -11,6 +11,7 @@
     "test": "vitest run",
     "verify": "pnpm typecheck && pnpm lint && pnpm test && pnpm build",
     "db:generate": "drizzle-kit generate",
+    "db:migrate": "pnpm dlx tsx scripts/migrate.ts",
     "fhir:terminology": "pnpm dlx tsx scripts/generate-fhir-terminology.ts",
     "seed:demo": "pnpm dlx tsx scripts/seed-demo.ts",
     "eval:ai": "pnpm dlx tsx scripts/eval-ai.ts",
