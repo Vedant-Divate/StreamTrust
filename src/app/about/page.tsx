@@ -1,41 +1,32 @@
 import { COPY } from "@/domain/copy";
 
 export default function About() {
+  const sections = [
+    ["method", COPY.aboutMethodTitle, COPY.aboutMethodText],
+    ["limits", COPY.aboutLimitsTitle, COPY.aboutLimitsText],
+    ["privacy", COPY.aboutPrivacyTitle, COPY.aboutPrivacyText],
+    ["ai", COPY.aboutAiTitle, COPY.aboutAiText],
+  ] as const;
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-3xl font-semibold tracking-tight">{COPY.aboutTitle}</h1>
+      <h1 className="font-display text-3xl font-bold tracking-tight">{COPY.aboutTitle}</h1>
 
-      <section aria-labelledby="method" className="flex flex-col gap-2">
-        <h2 id="method" className="text-xl font-semibold">
-          {COPY.aboutMethodTitle}
-        </h2>
-        <p>{COPY.aboutMethodText}</p>
-      </section>
-
-      <section aria-labelledby="limits" className="flex flex-col gap-2">
-        <h2 id="limits" className="text-xl font-semibold">
-          {COPY.aboutLimitsTitle}
-        </h2>
-        <p>{COPY.aboutLimitsText}</p>
-      </section>
-
-      <section aria-labelledby="privacy" className="flex flex-col gap-2">
-        <h2 id="privacy" className="text-xl font-semibold">
-          {COPY.aboutPrivacyTitle}
-        </h2>
-        <p>{COPY.aboutPrivacyText}</p>
-      </section>
-
-      <section aria-labelledby="ai" className="flex flex-col gap-2">
-        <h2 id="ai" className="text-xl font-semibold">
-          {COPY.aboutAiTitle}
-        </h2>
-        <p>{COPY.aboutAiText}</p>
-      </section>
+      {sections.map(([id, title, text]) => (
+        <section
+          key={id}
+          aria-labelledby={id}
+          className="flex flex-col gap-2 border-t border-border pt-4"
+        >
+          <h2 id={id} className="font-display text-xl font-bold">
+            {title}
+          </h2>
+          <p className="leading-relaxed">{text}</p>
+        </section>
+      ))}
 
       <section
         aria-label="Disclaimers"
-        className="flex flex-col gap-2 rounded-lg bg-muted p-4 text-sm"
+        className="flex flex-col gap-2 rounded-lg border-l-4 border-warning bg-warning-wash p-4 text-sm leading-relaxed"
       >
         <p>{COPY.disclaimerMonitoringOnly}</p>
         <p>{COPY.disclaimerAiCanBeWrong}</p>
