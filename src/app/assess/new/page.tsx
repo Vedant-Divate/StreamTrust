@@ -90,7 +90,13 @@ export default function NewAssessment() {
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <p className="text-sm text-muted-foreground">{COPY.assessStep1of4}</p>
+        <p aria-label={COPY.assessStep1of4} className="text-sm text-muted-foreground">
+          Step{" "}
+          <span aria-hidden="true" className="font-display text-base font-bold text-primary">
+            1
+          </span>{" "}
+          of 4: place and time
+        </p>
         <h1 className="font-display text-2xl font-bold tracking-tight">{COPY.assessNewTitle}</h1>
       </div>
 
