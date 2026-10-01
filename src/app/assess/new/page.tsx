@@ -108,8 +108,25 @@ export default function NewAssessment() {
           />
         </div>
 
-        <fieldset className="flex flex-col gap-2">
-          <legend className="font-medium">Location</legend>
+        <fieldset className="flex flex-col gap-2 border-t border-border pt-4">
+          <legend className="flex items-center gap-2 px-1 font-medium">
+            <svg
+              width="20"
+              height="8"
+              viewBox="0 0 20 8"
+              fill="none"
+              aria-hidden="true"
+              className="text-primary"
+            >
+              <path
+                d="M1 5q2.5-3.5 5 0t5 0t5 0"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+              />
+            </svg>
+            Location
+          </legend>
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1">
               <label htmlFor="lat">{COPY.latLabel}</label>
@@ -154,7 +171,7 @@ export default function NewAssessment() {
           </div>
         </fieldset>
 
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1 border-t border-border pt-4">
           <label htmlFor="observed-at">{COPY.observedAtLabel}</label>
           <input
             id="observed-at"
@@ -166,7 +183,7 @@ export default function NewAssessment() {
           />
         </div>
 
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1 border-t border-border pt-4">
           <label htmlFor="rain">{COPY.rainLabel}</label>
           <select
             id="rain"
@@ -182,7 +199,7 @@ export default function NewAssessment() {
           </select>
         </div>
 
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1 border-t border-border pt-4">
           <label htmlFor="notes">{COPY.notesLabel}</label>
           <textarea
             id="notes"
