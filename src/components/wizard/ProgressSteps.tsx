@@ -4,9 +4,23 @@ import { COPY } from "@/domain/copy";
 
 export function ProgressSteps({ step, of }: { step: number; of: number }) {
   return (
-    <p aria-label={`Step ${step} of ${of}`} className="text-sm text-muted-foreground">
-      Step {step} of {of}
-    </p>
+    <div className="flex flex-col gap-1.5">
+      <p aria-label={`Step ${step} of ${of}`} className="text-sm text-muted-foreground">
+        Step {step} of {of}
+      </p>
+      <div aria-hidden="true" className="flex gap-1.5">
+        {Array.from({ length: of }, (_, i) => (
+          <span
+            key={i}
+            className={
+              i < step
+                ? "h-1.5 flex-1 rounded-full bg-primary"
+                : "h-1.5 flex-1 rounded-full bg-border"
+            }
+          />
+        ))}
+      </div>
+    </div>
   );
 }
 

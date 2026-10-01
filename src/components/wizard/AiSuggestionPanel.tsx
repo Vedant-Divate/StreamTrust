@@ -1,5 +1,6 @@
 "use client";
 
+import { EyeOff } from "lucide-react";
 import { COPY } from "@/domain/copy";
 import type { ConfidenceBand } from "@/domain/types";
 
@@ -22,6 +23,22 @@ function bandLabel(band: string): string {
   return COPY.bandHigh;
 }
 
+/** Depth dots echo the confidence-band text (decorative; the label carries meaning). */
+function BandDots({ band }: { band: ConfidenceBand }) {
+  const filled = band === "low" ? 1 : band === "medium" ? 2 : 3;
+  return (
+    <span aria-hidden="true" className="inline-flex items-end gap-1">
+      {[1, 2, 3].map((i) => (
+        <span
+          key={i}
+          className={i <= filled ? "w-1.5 rounded-full bg-primary" : "w-1.5 rounded-full bg-border"}
+          style={{ height: `${6 + i * 3}px` }}
+        />
+      ))}
+    </span>
+  );
+}
+
 export function AiSuggestionPanel({
   suggestion,
   onUse,
@@ -31,20 +48,24 @@ export function AiSuggestionPanel({
 }) {
   if (!suggestion || suggestion.suggested_value === CANNOT_DETERMINE) {
     return (
-      <p className="rounded-lg bg-muted p-3 text-sm text-muted-foreground">{COPY.aiCantTell}</p>
+      <p className="flex items-center gap-2 rounded-lg bg-muted p-3 text-sm text-muted-foreground">
+        <EyeOff aria-hidden="true" className="h-4 w-4 shrink-0" />
+        {COPY.aiCantTell}
+      </p>
     );
   }
   const band = suggestion.confidence_band as ConfidenceBand;
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-dashed p-3">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="rounded-full bg-muted px-3 py-1 text-sm font-medium">
+    <div className="flex flex-col gap-2 rounded-lg border border-dashed border-primary/50 bg-info-wash p-3">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <span className="rounded-full bg-primary px-3 py-1 text-sm font-medium text-primary-foreground">
           AI suggests: {suggestion.suggested_value.replace(/_/g, " ")}
         </span>
         <span
           title={COPY.bandTooltip}
-          className="rounded-full border px-3 py-1 text-sm text-muted-foreground"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground"
         >
+          <BandDots band={band} />
           {bandLabel(band)}
         </span>
       </div>

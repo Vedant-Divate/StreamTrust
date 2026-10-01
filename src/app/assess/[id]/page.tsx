@@ -139,7 +139,7 @@ export default function Wizard() {
     <div className="flex flex-col gap-8">
       <section aria-labelledby="photos-h" className="flex flex-col gap-3">
         <ProgressSteps step={2} of={4} />
-        <h1 id="photos-h" className="text-2xl font-semibold tracking-tight">
+        <h1 id="photos-h" className="font-display text-2xl font-bold tracking-tight">
           {COPY.assessPhotosTitle}
         </h1>
         <p className="text-muted-foreground">{COPY.photoHelp}</p>
@@ -148,7 +148,7 @@ export default function Wizard() {
 
       <section aria-labelledby="indicators-h" className="flex flex-col gap-4">
         <ProgressSteps step={3} of={4} />
-        <h2 id="indicators-h" className="text-2xl font-semibold tracking-tight">
+        <h2 id="indicators-h" className="font-display text-2xl font-bold tracking-tight">
           {COPY.assessIndicatorsTitle}
         </h2>
         <p aria-live="polite" className="min-h-[1.5rem] text-sm text-muted-foreground">

@@ -91,7 +91,7 @@ export default function NewAssessment() {
     <div className="flex flex-col gap-5">
       <div>
         <p className="text-sm text-muted-foreground">{COPY.assessStep1of4}</p>
-        <h1 className="text-2xl font-semibold tracking-tight">{COPY.assessNewTitle}</h1>
+        <h1 className="font-display text-2xl font-bold tracking-tight">{COPY.assessNewTitle}</h1>
       </div>
 
       <form onSubmit={onSubmit} className="flex flex-col gap-4">

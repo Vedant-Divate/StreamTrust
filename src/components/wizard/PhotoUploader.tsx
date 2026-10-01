@@ -90,14 +90,17 @@ export function PhotoUploader({
       ) : (
         <ul className="grid grid-cols-2 gap-3">
           {photos.map((p) => (
-            <li key={p.id} className="flex flex-col gap-1 rounded-lg border p-2">
+            <li
+              key={p.id}
+              className="flex flex-col gap-1 rounded-lg border border-border bg-card p-2"
+            >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={`/api/photos/${p.id}`}
                 alt={`Stream photo (${p.width} by ${p.height})`}
                 className="aspect-[4/3] w-full rounded object-cover"
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs tabular-nums text-muted-foreground">
                 {p.width} × {p.height}
               </p>
               <button
