@@ -8,7 +8,7 @@
  * `cannot_determine`) and `litter` carries an invalid value with an
  * out-of-range confidence (must become `cannot_determine`, band `none`).
  */
-import type { AssessmentProvider, RawSuggestResult, SuggestInput } from "@/server/ai/provider";
+import type { AssessmentProvider, RawSuggestResult } from "@/server/ai/provider";
 
 export const MOCK_MODEL = "mock-1";
 
@@ -16,7 +16,9 @@ export class MockProvider implements AssessmentProvider {
   readonly name = "mock" as const;
   readonly model = MOCK_MODEL;
 
-  async suggest(_input: SuggestInput): Promise<RawSuggestResult> {
+  // No input parameter: the fixture is fully deterministic. Callers use
+  // the AssessmentProvider interface, so this stays assignable.
+  async suggest(): Promise<RawSuggestResult> {
     return {
       image_quality: "ok",
       indicators: [

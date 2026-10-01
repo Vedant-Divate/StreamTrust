@@ -126,11 +126,7 @@ describe("normalizeSuggestions with a deliberately non-compliant payload", () =>
 
 describe("normalizeSuggestions with the mock provider", () => {
   it("yields the full indicator set with enforced abstentions", async () => {
-    const raw = await new MockProvider().suggest({
-      images: [],
-      rainLast24h: "none",
-      promptVersion: "v1",
-    });
+    const raw = await new MockProvider().suggest();
     const out = normalizeSuggestions(raw);
     expect(out).toHaveLength(6);
     const byIndicator = Object.fromEntries(out.map((s) => [s.indicator, s]));
