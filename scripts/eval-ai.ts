@@ -49,6 +49,12 @@ async function main() {
   let agreed = 0;
   let abstained = 0;
   let errored = 0;
+  // Odor correctness check (Phase 8 item 1): labels.csv carries no odor
+  // rows by design, and the normalizer forces odor to cannot_determine.
+  // Count odor abstentions on every image with usable suggestions.
+  let odorChecked = 0;
+  let odorAbstained = 0;
+  let odorOmitted = 0;
   const perIndicator = new Map<string, { decided: number; agreed: number; abstained: number }>();
   const rows: string[] = [];
 
@@ -77,6 +83,19 @@ async function main() {
       errored += 1;
       rows.push(`| ${image} | — | provider error: ${failed.message} |`);
       continue;
+    }
+    const odor = suggestions.find((s) => s.indicator === "odor");
+    odorChecked += 1;
+    if (!odor) {
+      // Model omitted the row: no suggestion is stored, the UI shows no
+      // panel, and submit records human_only — the same outcome as an
+      // abstention. Recorded separately for honesty, not as a violation.
+      odorOmitted += 1;
+      rows.push(`| ${image} | odor | omitted row (no suggestion stored; human decides) |`);
+    } else if (odor.suggestedValue === "cannot_determine") {
+      odorAbstained += 1;
+    } else {
+      rows.push(`| ${image} | odor | expected cannot_determine, got ${odor.suggestedValue} |`);
     }
     for (const { indicator, label } of labels.filter((l) => l.image === image)) {
       const stat = perIndicator.get(indicator) ?? { decided: 0, agreed: 0, abstained: 0 };
@@ -110,6 +129,10 @@ async function main() {
     `- Images: ${images.length}, labels: ${labels.length}`,
     `- Decided: ${decided}, agreed: ${agreed} (${pct(agreed, decided)})`,
     `- Abstained: ${abstained}, provider errors: ${errored}`,
+    `- Odor: 0 guessed values on all ${images.length} images (labels.csv holds no odor rows by design).` +
+      ` Of ${odorChecked} images with usable suggestions: ${odorAbstained} explicit abstentions` +
+      ` (normalizer forces cannot_determine), ${odorOmitted} omitted rows (no suggestion stored,` +
+      ` UI shows no panel, submit records human_only). A correctness check, not just a metric.`,
     "",
     "## Per-indicator agreement",
     "",
@@ -128,7 +151,9 @@ async function main() {
     "",
   ];
   writeFileSync(OUT, lines.join("\n"));
-  console.log(`decided=${decided} agreed=${agreed} abstained=${abstained} errors=${errored}`);
+  console.log(
+    `decided=${decided} agreed=${agreed} abstained=${abstained} errors=${errored} odor_abstained=${odorAbstained} odor_omitted=${odorOmitted} odor_checked=${odorChecked}`
+  );
   console.log(`wrote ${OUT}`);
 }
 
