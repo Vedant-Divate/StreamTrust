@@ -32,3 +32,19 @@ with one retry on schema failure or 5xx. Live Phase 4 evidence showed
   scale.
 - Section 8.4's "Timeout 25 s" now reads 40 s for the suggest route via
   this ADR (source-of-truth hierarchy: latest accepted ADR wins).
+
+## Update 2026-10-02: per-attempt timeout 40 s → 60 s
+
+- Status: accepted (amends the Decision above; everything else stands).
+- Evidence: NIM free tier degraded intraday — direct llama calls measured
+  8–21 s in the morning, 23–59 s (with occasional `finish=length`
+  verbosity) that evening; a prod suggest run failed at 47 s against the
+  40 s ceiling while the model was still generating. The 40 s budget no
+  longer covers observed slow-but-successful runs.
+- Change: `SUGGEST_TIMEOUT_MS` 40 s → 60 s. Retry policy unchanged (one
+  retry on schema failure or retryable 5xx only; timeouts still not
+  retried). Typical worst case stays ~70 s (fast failure + one 60 s
+  attempt + overhead), inside `maxDuration = 120` with margin; a double
+  full-length generation could approach the platform ceiling, in which
+  case Vercel terminates and the client sees the same generic provider
+  error as before — no worse than today.
