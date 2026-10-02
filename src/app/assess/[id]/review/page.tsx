@@ -292,7 +292,7 @@ export default function Review() {
         {status}
       </p>
 
-      <WizardNav backHref={`/assess/${id}`} />
+      <WizardNav backFallback={`/assess/${id}`} />
       <button
         type="button"
         onClick={() => void onSubmit()}

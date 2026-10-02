@@ -221,11 +221,7 @@ export default function Wizard() {
         ))}
       </section>
 
-      <WizardNav
-        backHref="/assess/new"
-        nextHref={`/assess/${id}/review`}
-        nextLabel={COPY.reviewButton}
-      />
+      <WizardNav backFallback="/" nextHref={`/assess/${id}/review`} nextLabel={COPY.reviewButton} />
     </div>
   );
 }

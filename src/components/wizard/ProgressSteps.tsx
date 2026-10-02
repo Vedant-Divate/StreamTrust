@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { COPY } from "@/domain/copy";
 
 export function ProgressSteps({ step, of }: { step: number; of: number }) {
@@ -32,29 +33,41 @@ export function ProgressSteps({ step, of }: { step: number; of: number }) {
   );
 }
 
+/**
+ * History back with a same-app fallback: follows the browser history when
+ * there is any (previous wizard step in the normal flow), otherwise goes
+ * to the fallback instead of leaving the app from a deep link.
+ */
+function BackButton({ fallback, label }: { fallback: string; label?: string }) {
+  const router = useRouter();
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        if (window.history.length > 1) router.back();
+        else router.push(fallback);
+      }}
+      className="inline-flex min-h-[44px] cursor-pointer items-center rounded-lg border border-border bg-background px-5 text-base font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+    >
+      {label ?? COPY.backButton}
+    </button>
+  );
+}
+
 export function WizardNav({
-  backHref,
+  backFallback,
   backLabel,
   nextHref,
   nextLabel,
 }: {
-  backHref?: string;
+  backFallback?: string;
   backLabel?: string;
   nextHref?: string;
   nextLabel?: string;
 }) {
   return (
     <nav aria-label="Wizard" className="flex items-center justify-between gap-3 pt-2">
-      <span>
-        {backHref && (
-          <a
-            href={backHref}
-            className="inline-flex min-h-[44px] items-center rounded-lg border px-5 text-base font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-          >
-            {backLabel ?? COPY.backButton}
-          </a>
-        )}
-      </span>
+      <span>{backFallback && <BackButton fallback={backFallback} label={backLabel} />}</span>
       <span>
         {nextHref && nextLabel && (
           <a
