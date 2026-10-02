@@ -85,6 +85,27 @@ export async function POST(req: Request, ctx: Ctx) {
     rerun = false;
   }
 
+  // Dedupe BEFORE the rate limit: serving cached suggestions costs no
+  // provider resources, so re-clicking "Get AI suggestions" on unchanged
+  // photos must not burn hourly quota (it did, and users read the 429 as
+  // "AI unavailable").
+  const existing = await getSuggestionsByAssessment(db, id);
+  const newestPhoto = photos
+    .map((p) => p.createdAt)
+    .sort()
+    .at(-1)!;
+  const newestSuggestion = existing
+    .map((s) => s.createdAt)
+    .sort()
+    .at(-1);
+  if (!rerun && newestSuggestion && newestPhoto <= newestSuggestion) {
+    return NextResponse.json({
+      suggestions: existing.map(toPublic),
+      deduped: true,
+      photoSetHash: photoSetHash(photos.map((p) => p.sha256)),
+    });
+  }
+
   const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
   const recent = await db
     .select({ id: rateEvents.id })
@@ -101,23 +122,6 @@ export async function POST(req: Request, ctx: Ctx) {
       errorBody("rate_limited", "Too many suggestion requests. Try again later."),
       { status: 429 }
     );
-  }
-
-  const existing = await getSuggestionsByAssessment(db, id);
-  const newestPhoto = photos
-    .map((p) => p.createdAt)
-    .sort()
-    .at(-1)!;
-  const newestSuggestion = existing
-    .map((s) => s.createdAt)
-    .sort()
-    .at(-1);
-  if (!rerun && newestSuggestion && newestPhoto <= newestSuggestion) {
-    return NextResponse.json({
-      suggestions: existing.map(toPublic),
-      deduped: true,
-      photoSetHash: photoSetHash(photos.map((p) => p.sha256)),
-    });
   }
 
   let provider: AssessmentProvider;

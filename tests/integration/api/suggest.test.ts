@@ -160,6 +160,18 @@ describe("POST /api/assessments/:id/suggest (mock)", () => {
     expect(body.error.code).toBe("rate_limited");
   });
 
+  it("serves cached suggestions without burning quota", async () => {
+    const { id, cookie } = await createDraftWithPhoto();
+    for (let i = 0; i < 10; i++) {
+      expect((await suggest(id, cookie, true)).status).toBe(200);
+    }
+    // Quota exhausted, but the photo set is unchanged: the cached answer
+    // must still serve (dedupe runs before the rate limit).
+    const cached = await suggest(id, cookie);
+    expect(cached.status).toBe(200);
+    expect(((await cached.json()) as { deduped: boolean }).deduped).toBe(true);
+  });
+
   it("rejects photo-less, cookie-less and submitted assessments", async () => {
     const draft = await POST_DRAFT(
       new Request("http://localhost/api/assessments", {
