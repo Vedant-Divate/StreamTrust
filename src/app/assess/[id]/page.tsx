@@ -32,6 +32,7 @@ export default function Wizard() {
   const [loadError, setLoadError] = useState("");
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [suggestState, setSuggestState] = useState<"idle" | "loading" | "error" | "done">("idle");
+  const [suggestError, setSuggestError] = useState<string>(COPY.suggestionsFailed);
   // Autosaves can overlap when the user answers quickly. Only the latest
   // response may update the view; stale ones are dropped so the UI (and
   // the "saved" flag) never reflects an older server state.
@@ -142,10 +143,16 @@ export default function Wizard() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({}),
       });
-      if (!res.ok) throw new Error("suggest failed");
+      if (!res.ok) {
+        const body = (await res.json().catch(() => null)) as {
+          error?: { message?: string };
+        } | null;
+        throw new Error(body?.error?.message ?? COPY.suggestionsFailed);
+      }
       await refresh();
       setSuggestState("done");
-    } catch {
+    } catch (err) {
+      setSuggestError(err instanceof Error ? err.message : COPY.suggestionsFailed);
       setSuggestState("error");
     }
   }
@@ -195,7 +202,7 @@ export default function Wizard() {
               {suggestState === "loading" ? COPY.suggestionsLoading : COPY.getSuggestions}
             </button>
             <p aria-live="polite" className="min-h-[1.5rem] text-sm text-muted-foreground">
-              {suggestState === "error" ? COPY.suggestionsFailed : ""}
+              {suggestState === "error" ? suggestError : ""}
             </p>
           </div>
         )}
