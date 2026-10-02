@@ -69,19 +69,23 @@ export async function POST(req: Request) {
     );
   }
 
-  let volunteerId = getVolunteerId(req);
-  let freshCookie = false;
-  if (!volunteerId) {
-    const volunteer = await createVolunteer(db);
-    volunteerId = volunteer.id;
-    freshCookie = true;
-  }
-  const site = await createSite(db, {
-    name: parsed.data.site.name,
-    lat: round4(parsed.data.site.lat),
-    lng: round4(parsed.data.site.lng),
-    accuracyM: parsed.data.site.accuracyM,
-  });
+  // Volunteer + site are independent rows: create them concurrently so
+  // draft creation costs one round-trip instead of two (matters on Turso).
+  const existingVolunteerId = getVolunteerId(req);
+  const [volunteerId, freshCookie, site] = await (async () => {
+    const sitePromise = createSite(db, {
+      name: parsed.data.site.name,
+      lat: round4(parsed.data.site.lat),
+      lng: round4(parsed.data.site.lng),
+      accuracyM: parsed.data.site.accuracyM,
+    });
+    if (existingVolunteerId) {
+      const [siteRow] = await Promise.all([sitePromise]);
+      return [existingVolunteerId, false, siteRow] as const;
+    }
+    const [volunteer, siteRow] = await Promise.all([createVolunteer(db), sitePromise]);
+    return [volunteer.id, true, siteRow] as const;
+  })();
   const assessment = await createAssessment(db, {
     volunteerId,
     siteId: site.id,

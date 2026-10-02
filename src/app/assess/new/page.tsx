@@ -238,9 +238,10 @@ export default function NewAssessment() {
         <button
           type="submit"
           disabled={saving}
+          aria-busy={saving}
           className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-primary px-6 text-base font-medium text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:opacity-50"
         >
-          {saving ? "…" : COPY.continueButton}
+          {saving ? COPY.submitting : COPY.continueButton}
         </button>
       </form>
     </div>
