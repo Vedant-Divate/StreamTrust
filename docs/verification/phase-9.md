@@ -9,6 +9,8 @@ typecheck, lint, test, build; `AI_PROVIDER=mock`, `DATABASE_URL=file:./ci.db` â€
 no live API call possible). Pushed as `b674d14`; real GitHub Actions run
 **36971376795** on that exact SHA: `completed success`
 (https://github.com/Vedant-Divate/StreamTrust/actions/runs/36971376795).
+Final gate commit `24a7de2` likewise green twice
+(**36973339327**, **36973339290**, both `completed success`).
 
 ## 2. Production env (task 2)
 
