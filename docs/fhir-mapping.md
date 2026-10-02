@@ -54,6 +54,12 @@ sent (rounded coords, no names); the UI says so before sending.
 
 ## Expected validator warnings
 
+Phase 9 smoke test (2026-10-02, live HAPI, deployed Bundle): **0 errors**,
+27 warnings + 18 information notices, all in the same three categories —
+consistent with the Phase 6 result, so nothing in the mapping changed.
+Warning _counts_ vary per Bundle (they scale with entry/issue content);
+only the error count is a gate.
+
 Validating our Bundle against the public HAPI validator returns zero
 errors plus non-error findings in three benign, expected categories
 (concrete example from the Phase 6 gate: 12 warnings, 15 warnings, and
