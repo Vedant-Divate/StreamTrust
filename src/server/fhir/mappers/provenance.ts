@@ -1,5 +1,11 @@
 import type { Provenance } from "fhir/r4";
-import { fhirBase, urn, type EntryData, type SuggestionData } from "@/server/fhir/mappers/common";
+import {
+  buildNarrative,
+  fhirBase,
+  urn,
+  type EntryData,
+  type SuggestionData,
+} from "@/server/fhir/mappers/common";
 
 export interface ProvenanceArgs {
   id: string;
@@ -35,6 +41,14 @@ export function mapProvenance(args: ProvenanceArgs): Provenance {
     });
   }
 
+  const summaryBits = [`Decision: ${args.entry.decisionSource}.`];
+  if (args.suggestion) {
+    summaryBits.push(
+      `AI suggested ${args.suggestion.suggestedValue} (${args.suggestion.confidenceBand}).`
+    );
+  }
+  const summary = summaryBits.join(" ");
+
   const provenance: Provenance = {
     resourceType: "Provenance",
     id: args.id,
@@ -42,6 +56,7 @@ export function mapProvenance(args: ProvenanceArgs): Provenance {
     recorded: args.submittedAt,
     activity: { coding: [{ system: DATA_OP, code: "CREATE" }] },
     agent,
+    text: buildNarrative([summary]),
   };
 
   if (args.useExtensions) {
@@ -62,13 +77,7 @@ export function mapProvenance(args: ProvenanceArgs): Provenance {
     }
     provenance.extension = extension;
   } else {
-    const bits = [`Decision: ${args.entry.decisionSource}.`];
-    if (args.suggestion) {
-      bits.push(
-        `AI suggested ${args.suggestion.suggestedValue} (${args.suggestion.confidenceBand}).`
-      );
-    }
-    provenance.reason = [{ text: bits.join(" ") }];
+    provenance.reason = [{ text: summary }];
   }
   return provenance;
 }

@@ -4,6 +4,7 @@
  * five per-resource mappers stay one-function-per-file.
  */
 import { randomUUID } from "node:crypto";
+import type { Narrative } from "fhir/r4";
 
 export interface SiteData {
   name: string | null;
@@ -44,6 +45,29 @@ export function fhirBase(): string {
 
 export function urn(id: string): string {
   return `urn:uuid:${id}`;
+}
+
+/** Escape text for embedding in narrative XHTML. */
+export function escapeXml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+/**
+ * Generated narrative from existing human-readable content (no new facts).
+ * Silences the dom-6 "resource should have narrative" best-practice warning
+ * from the FHIR validator; unknown-CodeSystem/extension findings are
+ * inherent to project-defined systems and unaffected.
+ */
+export function buildNarrative(paragraphs: string[]): Narrative {
+  const div = paragraphs.map((p) => `<p>${escapeXml(p)}</p>`).join("");
+  return {
+    status: "generated",
+    div: `<div xmlns="http://www.w3.org/1999/xhtml">${div}</div>`,
+  };
 }
 
 export function newId(): string {

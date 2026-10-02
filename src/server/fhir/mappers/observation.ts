@@ -1,6 +1,11 @@
 import type { Observation } from "fhir/r4";
 import { indicatorSystem, indicatorValueSystem } from "@/server/fhir/mappers/location";
-import { urn, type EntryData, type SuggestionData } from "@/server/fhir/mappers/common";
+import {
+  buildNarrative,
+  urn,
+  type EntryData,
+  type SuggestionData,
+} from "@/server/fhir/mappers/common";
 
 export interface ObservationArgs {
   id: string;
@@ -36,10 +41,16 @@ export function buildNoteText(args: {
 
 /** Map one indicator entry to a FHIR R4 Observation (Section 10.2). Pure. */
 export function mapObservation(args: ObservationArgs): Observation {
+  const noteText = buildNoteText({
+    decisionSource: args.entry.decisionSource,
+    suggestion: args.suggestion,
+    photoWaived: args.photoWaived,
+  });
   return {
     resourceType: "Observation",
     id: args.id,
     status: "final",
+    text: buildNarrative([noteText]),
     category: [
       {
         coding: [
@@ -64,11 +75,7 @@ export function mapObservation(args: ObservationArgs): Observation {
     },
     note: [
       {
-        text: buildNoteText({
-          decisionSource: args.entry.decisionSource,
-          suggestion: args.suggestion,
-          photoWaived: args.photoWaived,
-        }),
+        text: noteText,
       },
     ],
   };

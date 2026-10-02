@@ -1,5 +1,5 @@
 import type { Practitioner } from "fhir/r4";
-import { fhirBase } from "@/server/fhir/mappers/common";
+import { buildNarrative, fhirBase } from "@/server/fhir/mappers/common";
 
 /**
  * Map an anonymous volunteer to a Practitioner carrying only the opaque
@@ -10,6 +10,7 @@ export function mapPractitioner(volunteerId: string, id: string): Practitioner {
     resourceType: "Practitioner",
     id,
     active: true,
+    text: buildNarrative(["Anonymous volunteer observer."]),
     identifier: [
       {
         system: `${fhirBase()}/volunteer-id`,

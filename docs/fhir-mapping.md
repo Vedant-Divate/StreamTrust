@@ -54,11 +54,19 @@ sent (rounded coords, no names); the UI says so before sending.
 
 ## Expected validator warnings
 
-Phase 9 smoke test (2026-10-02, live HAPI, deployed Bundle): **0 errors**,
-27 warnings + 18 information notices, all in the same three categories —
-consistent with the Phase 6 result, so nothing in the mapping changed.
-Warning _counts_ vary per Bundle (they scale with entry/issue content);
-only the error count is a gate.
+Every resource carries a generated `text` narrative (built only from
+content already present, e.g. the Observation note), which silences the
+dom-6 best-practice findings entirely — live HAPI check 2026-10-02 on a
+15-entry Bundle: **0 errors, 12 warnings** (all unknown-CodeSystem), 6
+information notices (tolerated custom extensions). The remaining
+CodeSystem findings are inherent to project-defined systems on a public
+validator and cannot be reduced without registering the systems with HL7.
+
+Pre-narratives baseline for comparison — Phase 9 smoke test (2026-10-02,
+live HAPI, deployed Bundle without narratives): **0 errors**, 27 warnings
+(15 dom-6 + 12 unknown-CodeSystem) + 18 information notices, all in the
+same three categories as Phase 6. Warning _counts_ vary per Bundle (they
+scale with entry/issue content); only the error count is a gate.
 
 Validating our Bundle against the public HAPI validator returns zero
 errors plus non-error findings in three benign, expected categories

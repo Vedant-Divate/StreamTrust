@@ -1,14 +1,16 @@
 import type { Location } from "fhir/r4";
-import { fhirBase, type SiteData } from "@/server/fhir/mappers/common";
+import { buildNarrative, fhirBase, type SiteData } from "@/server/fhir/mappers/common";
 
 /** Map a stream site to a FHIR R4 Location (Section 10.2). Pure. */
 export function mapLocation(site: SiteData, id: string): Location {
+  const name = site.name?.trim() ? site.name : "Stream site";
   return {
     resourceType: "Location",
     id,
     status: "active",
     mode: "instance",
-    name: site.name?.trim() ? site.name : "Stream site",
+    name,
+    text: buildNarrative([`${name} at latitude ${site.lat}, longitude ${site.lng}.`]),
     physicalType: {
       coding: [
         {

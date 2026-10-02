@@ -57,6 +57,8 @@ describe("mapObservation", () => {
     expect(obs.performer?.[0]).toMatchObject({ reference: "urn:uuid:prac-1" });
     expect(obs.valueCodeableConcept?.coding?.[0]).toMatchObject({ code: "clarity-muddy" });
     expect(obs.note?.[0]?.text).toContain("Decision: human_override.");
+    expect(obs.text?.status).toBe("generated");
+    expect(obs.text?.div).toContain("Decision: human_override.");
   });
 
   it("encodes not_applicable values with the compound code", () => {
@@ -131,5 +133,6 @@ describe("mapProvenance", () => {
     expect(prov.extension).toBeUndefined();
     expect(prov.reason?.[0]?.text).toContain("Decision: human_override.");
     expect(prov.reason?.[0]?.text).toContain("AI suggested cloudy (medium).");
+    expect(prov.text?.div).toContain("Decision: human_override.");
   });
 });
