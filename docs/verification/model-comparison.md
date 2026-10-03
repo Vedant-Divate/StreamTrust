@@ -206,3 +206,36 @@ and single-run-per-photo coverage everywhere else. muse-glimmer moves
 from "rejected" to "backup if token budgets ever rise". gemma stays
 rejected. llama stays the default until a full 22-image eval says
 otherwise.
+
+## Follow-up — 2026-10-03: scoping the diffusiongemma bug beyond dry-bed
+
+Question: is the empty/502 failure specific to dry-bed inputs, or does
+it strike whenever the model faces uncertainty? Four non-dry hard cases
+from the fixture set, 2 direct runs each, same prompt shape and sampling
+params as `nim-provider.ts` (temp 0.3, top_p 0.9, `max_tokens` 800) —
+fixture originals this time rather than pre-shrunk copies. No code,
+defaults, ADR, or env files touched.
+
+| photo (team labels)                                        | run 1                                                                                  | run 2                                             |
+| ---------------------------------------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| turbid-08 (cloudy / unusual / none / some / fast)          | 2,080 ms ✓ 6 rows: slightly_cloudy / brown / none / a_lot / slow + odor abstained      | 1,901 ms ✓ identical 6 rows                       |
+| litter-02 (cloudy / green / heavy / some / standing)       | 2,122 ms ✓ 6 rows: clarity abstained, green / heavy / some / standing + odor abstained | 2,020 ms ✓ identical 6 rows                       |
+| clear-02, control (clear / colorless / none / none / fast) | 2,118 ms ✓ 6 rows, 5/5 exact + odor abstained                                          | 2,630 ms ✓ identical 6 rows                       |
+| turbid-05 (cloudy / unusual / none / none / fast)          | 2,088 ms ✓ 6 rows: slightly_cloudy / brown / none / none / fast + odor abstained       | 3,540 ms ✓ 6 rows, color unusual instead of brown |
+
+8/8 parse, zero empties, latencies 1.9–3.5 s. Quality notes, recorded
+honestly: turbid-08 overcalls litter (a_lot vs some) and hedges clarity
+and flow one step adjacent; turbid-05 wobbles brown↔unusual across runs
+(a genuinely hard distinction — the label itself is unusual). Neither is
+an abstention failure: every run returned a full structured assessment.
+
+Verdict: **the bug is narrow, not general.** Dry-bed inputs are the only
+observed trigger for the valid-JSON-zero-rows collapse. On every other
+hard case — opaque water, contested clarity, adjacent color calls — the
+model decides per indicator and abstains per indicator exactly as
+Product principle 2 requires (litter-02's clarity abstention alongside
+four correct decisions is the principle working). Classification:
+document-and-avoid — dry scenes already fail cleanly at the route
+(`provider_failed`, "continue manually") and need human handling, but
+this is not unreliability-on-uncertainty and does not disqualify the
+model. No change to the standing recommendation.
